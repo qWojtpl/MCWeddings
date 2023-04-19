@@ -1,0 +1,19 @@
+name: MCWeddings
+version: '${project.version}'
+main: pl.mcweddings.MCWeddings
+api-version: 1.19
+authors: [Assasin98980]
+description: Add weddings to your Minecraft server
+softdepend:
+  - LuckPerms
+commands:
+  marry:
+    usage: /<command>
+    description: Marry another player
+    aliases:
+      - slub
+  divorce:
+    usage: /<command>
+    description: Divorce with another player
+    aliases:
+      - rozwod

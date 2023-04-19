@@ -1,0 +1,75 @@
+config:
+
+  # Prefix for commands
+
+  prefix: "&d[&cMCWeddings&d] "
+
+  # Manage plugin permission
+
+  managePermission: "mcweddings.manage"
+
+  # Permission to marry someone
+
+  marryPermission: "mcweddings.marry"
+
+  # Permission to divorce
+
+  divorcePermission: "mcweddings.divorce"
+
+  # Player will get this permission if is married
+  # REQUIRES LUCKPERMS
+
+  marryStatusPermission: "mcweddings.ismarried"
+
+  # Message if player don't have permission and tried to execute a command
+
+  noPermission: "&cYou don't have permission!"
+
+  # Broadcast marry message. {0} is first player, {1} is second player
+
+  marryMessage: "&a{0} is now married with {1}!"
+
+  # Divorce message. {0} is first player, {1} is second player
+
+  divorceMessage: "&c{0} is no longer married with {1}!"
+
+  # Marriage inquiry message. {0} is first player.
+
+  marriageInquiryMessage: "&a{0} want to marry with you. Type /marry {0} to accept!"
+
+  # Marry request send message. {0} is second player.
+
+  marryRequestSentMessage: "&aSent marry request to {0}."
+
+  # Cost for marry/divorce. Can be any item.
+
+  cost:
+    marry:
+      0:
+        item: GOLD_INGOT
+        count: 3
+        #name: ""
+        #lore: ""
+      1:
+        item: DIAMOND
+        count: 5
+        name: "Marry diamond"
+    divorce:
+      0:
+        item: WITHER_ROSE
+        count: 12
+        name: "Divorce rose"
+
+  # Configure rewards
+
+  rewards:
+    1: # How many days marry must be
+      item: DIAMOND
+      count: 2
+      name: "Super diamonds!"
+      #lore: ""
+    7:
+      item: EMERALD
+      count: 12
+      #name: ""
+      #lore: ""
