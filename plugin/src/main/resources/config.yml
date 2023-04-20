@@ -1,9 +1,5 @@
 config:
 
-  # Prefix for commands
-
-  prefix: "&d[&cMCWeddings&d] "
-
   # Manage plugin permission
 
   managePermission: "mcweddings.manage"
@@ -20,26 +16,6 @@ config:
   # REQUIRES LUCKPERMS
 
   marryStatusPermission: "mcweddings.ismarried"
-
-  # Message if player don't have permission and tried to execute a command
-
-  noPermission: "&cYou don't have permission!"
-
-  # Broadcast marry message. {0} is first player, {1} is second player
-
-  marryMessage: "&a{0} is now married with {1}!"
-
-  # Divorce message. {0} is first player, {1} is second player
-
-  divorceMessage: "&c{0} is no longer married with {1}!"
-
-  # Marriage inquiry message. {0} is first player.
-
-  marriageInquiryMessage: "&a{0} want to marry with you. Type /marry {0} to accept!"
-
-  # Marry request send message. {0} is second player.
-
-  marryRequestSentMessage: "&aSent marry request to {0}."
 
   # Cost for marry/divorce. Can be any item.
 
@@ -73,3 +49,57 @@ config:
       count: 12
       #name: ""
       #lore: ""
+
+messages:
+
+  # Prefix for commands
+
+  prefix: "&d[&cMCWeddings&d] "
+
+  # Message if player don't have permission and tried to execute a command
+
+  noPermission: "&cYou don't have permission!"
+
+  # Broadcast marry message. {0} is first player, {1} is second player
+
+  marryMessage: "&a{0} is now married with {1}!"
+
+  # Divorce message. {0} is first player, {1} is second player
+
+  divorceMessage: "&c{0} is no longer married with {1}!"
+
+  # Marriage inquiry message. {0} is first player.
+
+  marriageInquiryMessage: "&a{0} want to marry with you. Type /marry {0} to accept!"
+
+  # Marry request send message. {0} is second player.
+
+  marryRequestSentMessage: "&aSent marry request to {0}."
+
+  # Message will be sent if player is not online. {0} is a player.
+
+  cannotFoundPlayer: "&cCannot found player: {0}"
+
+  # Message to console if console decide to marry someone
+
+  mustBePlayer: "&cYou must be a player!"
+
+  # Message if someone decide to marry himself
+
+  marryHimself: "&cYou can't marry yourself."
+
+  # Message if someone will send requests two times or more
+
+  requestAlreadySent: "&cYou've already sent request to this player!"
+
+  # Message when someone send request to another player. {0} is another player.
+
+  requestSent: "&aSent marry request to {0}!"
+
+  # Message when someone tries to marry another married player.
+
+  playerAlreadyMarried: "&cThis player is already married!"
+  
+  # Message when someone tries to marry another player while being married
+  
+  youAreMarried: "&cYou're already married!"

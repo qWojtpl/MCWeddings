@@ -21,6 +21,13 @@ public class DataHandler {
     private String divorceMessage;
     private String marriageInquiryMessage;
     private String marryRequestSentMessage;
+    private String cannotFoundPlayer;
+    private String mustBePlayer;
+    private String marryHimself;
+    private String requestAlreadySent;
+    private String requestSent;
+    private String playerAlreadyMarried;
+    private String youAreMarried;
 
     public void loadConfig() {
         plugin.getPermissionManager().getPermissions().clear();
@@ -29,16 +36,23 @@ public class DataHandler {
             plugin.saveResource("config.yml", false);
         }
         YamlConfiguration yml = YamlConfiguration.loadConfiguration(configFile);
-        this.prefix = yml.getString("config.prefix");
         this.managePermission = yml.getString("config.managePermission");
         this.marryPermission = yml.getString("config.marryPermission");
         this.divorcePermission = yml.getString("config.divorcePermission");
         this.marryStatusPermission = yml.getString("config.marryStatusPermission");
-        this.noPermission = getYAMLString(yml, "config.noPermission");
-        this.marryMessage = getYAMLString(yml, "config.marryMessage");
-        this.divorceMessage = getYAMLString(yml, "config.divorceMessage");
-        this.marriageInquiryMessage = getYAMLString(yml, "config.marriageInquiryMessage");
-        this.marryRequestSentMessage = getYAMLString(yml, "config.marryRequestSentMessage");
+        this.prefix = getYAMLString(yml, "messages.prefix");
+        this.noPermission = getYAMLString(yml, "messages.noPermission");
+        this.marryMessage = getYAMLString(yml, "messages.marryMessage");
+        this.divorceMessage = getYAMLString(yml, "messages.divorceMessage");
+        this.marriageInquiryMessage = getYAMLString(yml, "messages.marriageInquiryMessage");
+        this.marryRequestSentMessage = getYAMLString(yml, "messages.marryRequestSentMessage");
+        this.cannotFoundPlayer = getYAMLString(yml, "messages.cannotFoundPlayer");
+        this.mustBePlayer = getYAMLString(yml, "messages.mustBePlayer");
+        this.marryHimself = getYAMLString(yml, "messages.marryHimself");
+        this.requestAlreadySent = getYAMLString(yml, "messages.requestAlreadySent");
+        this.requestSent = getYAMLString(yml, "messages.requestSent");
+        this.playerAlreadyMarried = getYAMLString(yml, "messages.playerAlreadyMarried");
+        this.youAreMarried = getYAMLString(yml, "messages.youAreMarried");
         PermissionManager pm = plugin.getPermissionManager();
         pm.registerPermission(managePermission, "Manage MCWeddings plugin");
         pm.registerPermission(marryPermission, "Permission to marry other player");
