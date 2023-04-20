@@ -1,5 +1,10 @@
 package pl.mcweddings.commands;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -39,7 +44,7 @@ public class Commands implements CommandExecutor {
             if(args[0].equalsIgnoreCase("requirements")) {
 
             } else if(args[0].equalsIgnoreCase("rewards") && marry) {
-
+                showRewards(sender);
             } else {
                 if(marry) {
                     plugin.getMarriageManager().sendRequest(args[0], sender);
@@ -48,12 +53,12 @@ public class Commands implements CommandExecutor {
                 }
             }
         } else {
-            ShowHelp(sender);
+            showHelp(sender);
         }
         return true;
     }
 
-    public void ShowHelp(CommandSender sender) {
+    public void showHelp(CommandSender sender) {
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
         sender.sendMessage(" ");
         sender.sendMessage("§d/marry <nick> §4- §cMarry a plyer (or accept request)");
@@ -61,6 +66,17 @@ public class Commands implements CommandExecutor {
         sender.sendMessage("§d/marry rewards §4- §cRewards for being married");
         sender.sendMessage("§d/divorce <nick> §4- §cDivorce with player");
         sender.sendMessage("§d/divorce requirements §4- §cRequirements for getting divorced");
+        sender.sendMessage(" ");
+        sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
+    }
+
+    public void showRewards(CommandSender sender) {
+        sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
+        sender.sendMessage(" ");
+        sender.sendMessage("§dRewards for marriage length:");
+
+        sender.sendMessage("- 1 days (READY). CLICK ME");
+        sender.sendMessage("- 7 days (remaining 5 days). CLICK ME");
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
     }
