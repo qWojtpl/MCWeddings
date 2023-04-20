@@ -17,7 +17,7 @@ config:
 
   marryStatusPermission: "mcweddings.ismarried"
 
-  # In seconds. Every this seconds all marry requests will be killed
+  # In seconds. Every this seconds all marry requests will be cleared
 
   clearInterval: 120
 
@@ -49,12 +49,16 @@ config:
       item: DIAMOND
       count: 2
       name: "Super diamonds!"
-      #lore: ""
+      #lore: []
+      #enchantments:
+      #- DIG_SPEED:3
+      #unbreakable: true
     7:
       item: EMERALD
       count: 12
       #name: ""
-      #lore: ""
+      #lore:
+      #- "Some lore"
 
 messages:
 

@@ -43,17 +43,25 @@ public class Commands implements CommandExecutor {
             }
             if(args[0].equalsIgnoreCase("requirements")) {
 
-            } else if(args[0].equalsIgnoreCase("rewards") && marry) {
-                showRewards(sender);
             } else {
                 if(marry) {
-                    plugin.getMarriageManager().sendRequest(args[0], sender);
+                    if(args[0].equalsIgnoreCase("rewards")) {
+                        showRewards(sender);
+                    } else if(args[0].equalsIgnoreCase("status")) {
+                        showStatus(sender);
+                    } else {
+                        plugin.getMarriageManager().sendRequest(args[0], sender);
+                    }
                 } else {
-
+                    showHelp(sender);
                 }
             }
         } else {
-            showHelp(sender);
+            if(marry) {
+                showHelp(sender);
+            } else {
+                plugin.getMarriageManager().divorce(sender);
+            }
         }
         return true;
     }
@@ -64,7 +72,8 @@ public class Commands implements CommandExecutor {
         sender.sendMessage("§d/marry <nick> §4- §cMarry a plyer (or accept request)");
         sender.sendMessage("§d/marry requirements §4- §cRequirements for getting married");
         sender.sendMessage("§d/marry rewards §4- §cRewards for being married");
-        sender.sendMessage("§d/divorce <nick> §4- §cDivorce with player");
+        sender.sendMessage("§d/marry status §4- §cStatus of your marriage");
+        sender.sendMessage("§d/divorce §4- §cDivorce with player");
         sender.sendMessage("§d/divorce requirements §4- §cRequirements for getting divorced");
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
@@ -74,11 +83,23 @@ public class Commands implements CommandExecutor {
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
         sender.sendMessage(" ");
         sender.sendMessage("§dRewards for marriage length:");
-
+        TextComponent mainComponent = new TextComponent( "Here's a question: " );
+        mainComponent.setColor( ChatColor.GOLD );
+        TextComponent subComponent = new TextComponent( "Maybe u r noob?" );
+        subComponent.setColor( ChatColor.AQUA );
+        subComponent.setHoverEvent( new HoverEvent( HoverEvent.Action.SHOW_TEXT, new ComponentBuilder( "Click me!" ).create() ) );
+        subComponent.setClickEvent( new ClickEvent( ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/wiki/the-chat-component-api/" ) );
+        mainComponent.addExtra( subComponent );
+        mainComponent.addExtra( " Does that answer your question?" );
+        sender.spigot().sendMessage( mainComponent );
         sender.sendMessage("- 1 days (READY). CLICK ME");
         sender.sendMessage("- 7 days (remaining 5 days). CLICK ME");
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
+    }
+
+    public void showStatus(CommandSender sender) {
+
     }
 
 }

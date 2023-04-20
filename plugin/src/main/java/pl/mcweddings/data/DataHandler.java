@@ -10,6 +10,7 @@ import pl.mcweddings.MCWeddings;
 import pl.mcweddings.permissions.PermissionManager;
 import pl.mcweddings.wedding.Marriage;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -167,6 +168,18 @@ public class DataHandler {
             plugin.getLogger().severe("Cannot save file data.yml (creating new marriage)!");
         }
         return maxDataIndex;
+    }
+
+    public void removeMarriage(Marriage m) {
+        File dataFile = getDataFile();
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(dataFile);
+        String path = "data." + m.getId();
+        yml.set(path, null);
+        try {
+            yml.save(dataFile);
+        } catch(IOException e) {
+            plugin.getLogger().severe("Cannot save file data.yml (removing marriage)");
+        }
     }
 
     public File getDataFile() {

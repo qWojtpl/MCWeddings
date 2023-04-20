@@ -37,6 +37,13 @@ public class MarriageManager {
             sender.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getCannotFoundPlayer(), first));
             return;
         }
+        List<Integer> slots = getItemSlots(p, plugin.getDataHandler().getMarryCost());
+        if(slots.size() < 1) {
+            p.sendMessage(prefix + "§cYou don't have required items to marry someone! Check requirements at /marry requirements");
+            sender.sendMessage(prefix + "§cYour partner doesn't have required items. You can't marry right now.");
+            return;
+        }
+        takeItems(p, slots, plugin.getDataHandler().getMarryCost());
         plugin.getServer().broadcastMessage(prefix + MessageFormat.format(plugin.getDataHandler().getMarryMessage(), first, second));
         Marriage marriage = new Marriage(0, first, second, DateManager.getDate("-"), "d");
         marriage.setId(plugin.getDataHandler().createMarriage(marriage));
@@ -90,13 +97,40 @@ public class MarriageManager {
             sender.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getCannotFoundPlayer(), nickname));
             return;
         }
-        if(!checkItems((Player) sender, plugin.getDataHandler().getMarryCost())) {
+        if(getItemSlots((Player) sender, plugin.getDataHandler().getMarryCost()).size() < 1) {
             sender.sendMessage(prefix + "§cYou don't have required items to marry someone! Check requirements at /marry requirements");
             return;
         }
         createRequest(sender.getName(), nickname);
         sender.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getRequestSent(), nickname));
         p.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getMarriageInquiryMessage(), sender.getName()));
+    }
+
+    public void divorce(CommandSender sender) {
+        String prefix = plugin.getDataHandler().getPrefix();
+        if(!(sender instanceof Player)) {
+            sender.sendMessage(prefix + plugin.getDataHandler().getMustBePlayer());
+            return;
+        }
+        if(!isPlayerMarried(sender.getName())) {
+            sender.sendMessage(prefix + "§cYou're not married!");
+            return;
+        }
+        List<Integer> slots = getItemSlots((Player) sender, plugin.getDataHandler().getDivorceCost());
+        if(slots.size() < 1) {
+            sender.sendMessage(prefix + "§cYou don't have required items to get divorced! Check requirements at /divorce requirements");
+            return;
+        }
+        takeItems((Player) sender, slots, plugin.getDataHandler().getDivorceCost());
+        Marriage m = getPlayerMarriage(sender.getName());
+        String secondPlayer = (m.getFirst().equals(sender.getName()) ? m.getSecond() : m.getFirst());
+        sender.sendMessage(MessageFormat.format(prefix + "§aYou successfully divorced with {0}!", secondPlayer));
+        plugin.getServer().broadcastMessage(MessageFormat.format(prefix + plugin.getDataHandler().getDivorceMessage(), sender.getName(), secondPlayer));
+        for(Player player : plugin.getServer().getOnlinePlayers()) {
+            player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 1.0F, 3.0F);
+        }
+        plugin.getDataHandler().removeMarriage(m);
+        marriages.remove(m);
     }
 
     public boolean isPlayerMarried(String nickname) {
@@ -106,6 +140,15 @@ public class MarriageManager {
             }
         }
         return false;
+    }
+
+    public Marriage getPlayerMarriage(String nickname) {
+        for(Marriage m : marriages) {
+            if(m.getFirst().equals(nickname) || m.getSecond().equals(nickname)) {
+                return m;
+            }
+        }
+        return null;
     }
 
     public boolean hasRequest(String who, String from) {
@@ -141,15 +184,18 @@ public class MarriageManager {
         return true;
     }
 
-    public boolean checkItems(Player player, List<ItemStack> items) {
+    public List<Integer> getItemSlots(Player player, List<ItemStack> items) {
+        List<Integer> slots = new ArrayList<>();
         int goodItems = 0;
         for(ItemStack is : items) {
             int totalAmount = 0;
+            int lastSlot = -1;
             for(int i = 0; i < 36; i++) {
                 ItemStack inventoryItem = player.getInventory().getItem(i);
                 if(inventoryItem == null) continue;
-                if(inventoryItem.getType().equals(Material.AIR)) continue;
-                if(!inventoryItem.getType().equals(is.getType())) continue;
+                if(!is.getType().equals(Material.AIR)) {
+                    if(!inventoryItem.getType().equals(is.getType())) continue;
+                }
                 if(!inventoryItem.getItemMeta().getDisplayName().equals(is.getItemMeta().getDisplayName())) continue;
                 if(inventoryItem.getItemMeta().getLore() == null && is.getItemMeta().getLore() != null) continue;
                 if(inventoryItem.getItemMeta().getLore() != null && is.getItemMeta().getLore() == null) continue;
@@ -159,12 +205,41 @@ public class MarriageManager {
                     }
                 }
                 totalAmount += inventoryItem.getAmount();
+                lastSlot = i;
             }
-            if(totalAmount < is.getAmount()) return false;
+            if(totalAmount < is.getAmount()) return new ArrayList<>();
             goodItems++;
+            if(lastSlot != -1) slots.add(lastSlot);
         }
-        if(goodItems < items.size()) return false;
-        return true;
+        if(goodItems < items.size()) return new ArrayList<>();
+        return slots;
+    }
+
+    public void takeItems(Player player, List<Integer> checkSlots, List<ItemStack> items) {
+        for(ItemStack is : items) {
+            int required = is.getAmount();
+            for(int slot : checkSlots) {
+                ItemStack inventoryItem = player.getInventory().getItem(slot);
+                if(inventoryItem == null) continue;
+                if(!is.getType().equals(Material.AIR)) {
+                    if(!inventoryItem.getType().equals(is.getType())) continue;
+                }
+                if(!inventoryItem.getItemMeta().getDisplayName().equals(is.getItemMeta().getDisplayName())) continue;
+                if(inventoryItem.getItemMeta().getLore() == null && is.getItemMeta().getLore() != null) continue;
+                if(inventoryItem.getItemMeta().getLore() != null && is.getItemMeta().getLore() == null) continue;
+                if(inventoryItem.getItemMeta().getLore() != null) {
+                    if(is.getItemMeta().getLore() != null) {
+                        if(!inventoryItem.getItemMeta().getLore().equals(is.getItemMeta().getLore())) continue;
+                    }
+                }
+                required -= inventoryItem.getAmount();
+                if(required <= 0) {
+                    inventoryItem.setAmount(-required);
+                    break;
+                }
+            }
+        }
+        player.updateInventory();
     }
 
 }
