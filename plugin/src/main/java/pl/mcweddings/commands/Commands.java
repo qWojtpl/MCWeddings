@@ -15,11 +15,13 @@ public class Commands implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        boolean marry = false;
         if(label.equalsIgnoreCase("marry") || label.equalsIgnoreCase("slub")) {
             if(!sender.hasPermission(permissionManager.getPermission(dataHandler.getMarryPermission()))) {
                 sender.sendMessage(dataHandler.getPrefix() + dataHandler.getNoPermission());
                 return true;
             }
+            marry = true;
         } else {
             if(!sender.hasPermission(permissionManager.getPermission(dataHandler.getDivorcePermission()))) {
                 sender.sendMessage(dataHandler.getPrefix() + dataHandler.getNoPermission());
@@ -27,12 +29,19 @@ public class Commands implements CommandExecutor {
             }
         }
         if(args.length > 0) {
+            if(sender.hasPermission(permissionManager.getPermission(dataHandler.getManagePermission()))) {
+                if(args[0].equalsIgnoreCase("reload")) {
+                    plugin.getDataHandler().loadConfig();
+                    sender.sendMessage(dataHandler.getPrefix() + "§aReloaded!");
+                    return true;
+                }
+            }
             if(args[0].equalsIgnoreCase("requirements")) {
 
-            } else if(args[0].equalsIgnoreCase("rewards")) {
+            } else if(args[0].equalsIgnoreCase("rewards") && marry) {
 
             } else {
-                if(label.equalsIgnoreCase("marry") || label.equalsIgnoreCase("slub")) {
+                if(marry) {
                     plugin.getMarriageManager().sendRequest(args[0], sender);
                 } else {
 

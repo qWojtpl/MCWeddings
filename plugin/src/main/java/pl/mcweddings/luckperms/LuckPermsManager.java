@@ -11,7 +11,7 @@ public class LuckPermsManager {
     private final LuckPerms luckPermsInstance = LuckPermsProvider.get();
 
     public void addMarriagePermission(Player player) {
-
+        
     }
 
     public void removeMarriagePermission(Player player) {

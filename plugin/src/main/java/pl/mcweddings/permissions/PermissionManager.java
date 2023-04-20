@@ -16,6 +16,7 @@ public class PermissionManager {
 
     public void registerPermission(String permission, String description) {
         Permission perm = new Permission(permission, description);
+        plugin.getServer().getPluginManager().removePermission(perm);
         plugin.getServer().getPluginManager().addPermission(perm);
         permissions.put(permission, perm);
     }

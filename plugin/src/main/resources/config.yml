@@ -17,6 +17,10 @@ config:
 
   marryStatusPermission: "mcweddings.ismarried"
 
+  # In seconds. Every this seconds all marry requests will be killed
+
+  clearInterval: 120
+
   # Cost for marry/divorce. Can be any item.
 
   cost:
@@ -25,7 +29,9 @@ config:
         item: GOLD_INGOT
         count: 3
         #name: ""
-        #lore: ""
+        #lore:
+        #- Lore line 1
+        #- Lore line 2
       1:
         item: DIAMOND
         count: 5
