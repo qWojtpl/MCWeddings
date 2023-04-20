@@ -7,6 +7,7 @@ import pl.mcweddings.commands.Commands;
 import pl.mcweddings.data.DataHandler;
 import pl.mcweddings.luckperms.LuckPermsManager;
 import pl.mcweddings.permissions.PermissionManager;
+import pl.mcweddings.wedding.MarriageManager;
 
 @Getter
 public final class MCWeddings extends JavaPlugin {
@@ -14,11 +15,13 @@ public final class MCWeddings extends JavaPlugin {
     private static MCWeddings main;
     private DataHandler dataHandler;
     private PermissionManager permissionManager;
+    private MarriageManager marriageManager;
     private LuckPermsManager luckPermsManager;
     private boolean luckPermsAvailable;
 
     @Override
     public void onEnable() {
+        main = this;
         if(getServer().getPluginManager().getPlugin("LuckPerms") != null) {
             getLogger().info("LuckPerms is available! Suffixes are now possible.");
             luckPermsAvailable = true;
@@ -27,6 +30,7 @@ public final class MCWeddings extends JavaPlugin {
             getLogger().info("LuckPerms not found! Remember - you can use LuckPerms to manage suffixes!");
         }
         this.permissionManager = new PermissionManager();
+        this.marriageManager = new MarriageManager();
         this.dataHandler = new DataHandler();
         dataHandler.loadConfig();
         String[] commands = {"marry", "divorce"};
