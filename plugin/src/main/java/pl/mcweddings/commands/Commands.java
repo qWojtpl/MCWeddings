@@ -12,7 +12,9 @@ import org.bukkit.inventory.ItemStack;
 import pl.mcweddings.MCWeddings;
 import pl.mcweddings.data.DataHandler;
 import pl.mcweddings.permissions.PermissionManager;
+import pl.mcweddings.util.DateManager;
 import pl.mcweddings.wedding.Marriage;
+import pl.mcweddings.wedding.Reward;
 
 public class Commands implements CommandExecutor {
 
@@ -52,7 +54,15 @@ public class Commands implements CommandExecutor {
             } else {
                 if(marry) {
                     if(args[0].equalsIgnoreCase("rewards")) {
-                        showRewards(sender);
+                        if(args.length > 1) {
+                            try {
+                                plugin.getMarriageManager().getReward(sender, Integer.parseInt(args[1]));
+                            } catch(NumberFormatException e) {
+                                showRewards(sender);
+                            }
+                        } else {
+                            showRewards(sender);
+                        }
                     } else if(args[0].equalsIgnoreCase("status")) {
                         showStatus(sender);
                     } else {
@@ -90,20 +100,27 @@ public class Commands implements CommandExecutor {
     }
 
     public void showRewards(CommandSender sender) {
+        Marriage playerMarriage = plugin.getMarriageManager().getPlayerMarriage(sender.getName());
+        if(playerMarriage == null) {
+            sender.sendMessage(plugin.getDataHandler().getPrefix() + "§cYou're not married");
+            return;
+        }
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
         sender.sendMessage(" ");
-        sender.sendMessage("§dRewards for marriage length:");
-        TextComponent mainComponent = new TextComponent( "Here's a question: " );
-        mainComponent.setColor( ChatColor.GOLD );
-        TextComponent subComponent = new TextComponent( "Maybe u r noob?" );
-        subComponent.setColor( ChatColor.AQUA );
-        subComponent.setHoverEvent( new HoverEvent( HoverEvent.Action.SHOW_TEXT, new ComponentBuilder( "Click me!" ).create() ) );
-        subComponent.setClickEvent( new ClickEvent( ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/wiki/the-chat-component-api/" ) );
-        mainComponent.addExtra( subComponent );
-        mainComponent.addExtra( " Does that answer your question?" );
-        sender.spigot().sendMessage( mainComponent );
-        sender.sendMessage("§4- §d1 days §4(§aREADY§4) §c- §dCLICK ME");
-        sender.sendMessage("§4- §d7 days §4(§cremaining 5 days§4) §c- §dCLICK ME");
+        long daysOfMarriage = DateManager.calculateDays(playerMarriage.getDate(), DateManager.getDate("."));
+        sender.sendMessage("§dDays of marriage: §c" + daysOfMarriage);
+        sender.sendMessage("§dRewards for being married:");
+        for(Reward reward : plugin.getMarriageManager().getRewards()) {
+            int day = reward.getDay();
+            ItemStack is = reward.getItemStack();
+            String rewardDescription = (daysOfMarriage < day) ? "§4(§cremaining " + (day - daysOfMarriage) + " days§4)" : "§4(§aREADY§4)";
+            String hoverDescription = (daysOfMarriage < day) ? "§c§lRequires " + day + " days of marriage!" : "§a§lClick to receive reward!";
+            String rewardText = is.getItemMeta().getDisplayName() + "\n§4(§d" + is.getType() + "§4) x§d" + is.getAmount() + "\n" + hoverDescription;
+            TextComponent component = new TextComponent("§4- §d" + day + " days " + rewardDescription);
+            component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(rewardText).create()));
+            component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/marry rewards " + day));
+            sender.spigot().sendMessage(component);
+        }
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
     }

@@ -23,7 +23,7 @@ public class MarriageManager {
 
     private final MCWeddings plugin = MCWeddings.getInstance();
     private final List<Marriage> marriages = new ArrayList<>();
-    private final HashMap<Integer, Reward> rewards = new HashMap<>();
+    private final List<Reward> rewards = new ArrayList<>();
     private final HashMap<String, List<String>> requests = new HashMap<>();
     private int bellCount = 0;
     private int bellTask = -1;
@@ -137,6 +137,47 @@ public class MarriageManager {
         }
         plugin.getDataHandler().removeMarriage(m);
         marriages.remove(m);
+    }
+
+    public void getReward(CommandSender sender, int reward) {
+        String prefix = plugin.getDataHandler().getPrefix();
+        if(!(sender instanceof Player)) {
+            sender.sendMessage(prefix + plugin.getDataHandler().getMustBePlayer());
+            return;
+        }
+        Marriage m = getPlayerMarriage(sender.getName());
+        if(m == null) {
+            sender.sendMessage(prefix + "§cYou're not married!");
+            return;
+        }
+        Reward r = null;
+        for(Reward rew : getRewards()) {
+            if(rew.getDay() == reward) {
+                r = rew;
+                break;
+            }
+        }
+        if(r == null) {
+            sender.sendMessage(prefix + "§cCannot find this reward!");
+            return;
+        }
+        long daysOfMarriage = DateManager.calculateDays(m.getDate(), DateManager.getDate("."));
+        if(daysOfMarriage < r.getDay()) {
+            sender.sendMessage(prefix + "§cYou can't receive this reward yet!");
+            return;
+        }
+        Player p = PlayerUtil.getPlayer(sender.getName());
+        if(p == null) return;
+        ItemStack is = new ItemStack(r.getItemStack());
+        HashMap<Integer, ItemStack> another = p.getInventory().addItem(is);
+        if(another.size() > 0) {
+            for(int key : another.keySet()) {
+                p.getWorld().dropItem(p.getLocation(), another.get(key));
+            }
+        }
+        if(r.getExecute() != null) {
+            plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), r.getExecute());
+        }
     }
 
     public boolean isPlayerMarried(String nickname) {

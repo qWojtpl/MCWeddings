@@ -47,6 +47,7 @@ public class DataHandler {
     public void loadConfig() {
         plugin.getPermissionManager().getPermissions().clear();
         plugin.getMarriageManager().getMarriages().clear();
+        plugin.getMarriageManager().getRewards().clear();
         marryCost.clear();
         divorceCost.clear();
         File configFile = new File(plugin.getDataFolder(), "config.yml");
@@ -197,8 +198,8 @@ public class DataHandler {
                     }
                     is.setItemMeta(meta);
                 }
-                Reward reward = new Reward(is, yml.getString(path + ".execute"));
-                plugin.getMarriageManager().getRewards().put(day, reward);
+                Reward reward = new Reward(is, day, yml.getString(path + ".execute"));
+                plugin.getMarriageManager().getRewards().add(reward);
             }
         }
         loadData();

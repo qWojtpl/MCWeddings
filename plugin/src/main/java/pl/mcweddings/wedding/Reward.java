@@ -7,10 +7,12 @@ import org.bukkit.inventory.ItemStack;
 public class Reward {
 
     private final ItemStack itemStack;
+    private final int day;
     private final String execute;
 
-    public Reward(ItemStack is, String execute) {
+    public Reward(ItemStack is, int day, String execute) {
         this.itemStack = is;
+        this.day = day;
         this.execute = execute;
     }
 
