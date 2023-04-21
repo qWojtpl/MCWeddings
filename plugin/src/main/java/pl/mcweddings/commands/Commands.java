@@ -8,9 +8,11 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.inventory.ItemStack;
 import pl.mcweddings.MCWeddings;
 import pl.mcweddings.data.DataHandler;
 import pl.mcweddings.permissions.PermissionManager;
+import pl.mcweddings.wedding.Marriage;
 
 public class Commands implements CommandExecutor {
 
@@ -42,7 +44,11 @@ public class Commands implements CommandExecutor {
                 }
             }
             if(args[0].equalsIgnoreCase("requirements")) {
-
+                if(marry) {
+                    marriageRequirements(sender);
+                } else {
+                    divorceRequirements(sender);
+                }
             } else {
                 if(marry) {
                     if(args[0].equalsIgnoreCase("rewards")) {
@@ -75,6 +81,10 @@ public class Commands implements CommandExecutor {
         sender.sendMessage("§d/marry status §4- §cStatus of your marriage");
         sender.sendMessage("§d/divorce §4- §cDivorce with player");
         sender.sendMessage("§d/divorce requirements §4- §cRequirements for getting divorced");
+        if(sender.hasPermission(permissionManager.getPermission(dataHandler.getManagePermission()))) {
+            sender.sendMessage("§4--------- §dAdmin commands §4---------");
+            sender.sendMessage("§d/marry reload §4- §cReload configuration and data");
+        }
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
     }
@@ -92,14 +102,58 @@ public class Commands implements CommandExecutor {
         mainComponent.addExtra( subComponent );
         mainComponent.addExtra( " Does that answer your question?" );
         sender.spigot().sendMessage( mainComponent );
-        sender.sendMessage("- 1 days (READY). CLICK ME");
-        sender.sendMessage("- 7 days (remaining 5 days). CLICK ME");
+        sender.sendMessage("§4- §d1 days §4(§aREADY§4) §c- §dCLICK ME");
+        sender.sendMessage("§4- §d7 days §4(§cremaining 5 days§4) §c- §dCLICK ME");
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
     }
 
     public void showStatus(CommandSender sender) {
+        Marriage m = plugin.getMarriageManager().getPlayerMarriage(sender.getName());
+        if(m == null) {
+            sender.sendMessage(plugin.getDataHandler().getPrefix() + "§cYou're not married");
+            return;
+        }
+        String first = m.getFirst();
+        String second = m.getSecond();
+        sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
+        sender.sendMessage(" ");
+        sender.sendMessage("§d§l" + first + " §4❤ §d§l" + second);
+        sender.sendMessage("§dMarriage date: §c" + m.getDate());
+        sender.sendMessage(" ");
+        sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
+    }
 
+    public void marriageRequirements(CommandSender sender) {
+        sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
+        sender.sendMessage(" ");
+        sender.sendMessage("§dMarriage requirements:");
+        for(ItemStack is : plugin.getDataHandler().getMarryCost()) {
+            String name = "";
+            if(!is.getItemMeta().getDisplayName().equals("")) {
+                name = is.getItemMeta().getDisplayName() + " ";
+            }
+            sender.sendMessage(" §4- §f" + name +
+                    "§4(§d" + is.getType().name() + "§4) §4x§d" + is.getAmount());
+        }
+        sender.sendMessage(" ");
+        sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
+    }
+
+    public void divorceRequirements(CommandSender sender) {
+        sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
+        sender.sendMessage(" ");
+        sender.sendMessage("§dDivorce requirements:");
+        for(ItemStack is : plugin.getDataHandler().getDivorceCost()) {
+            String name = "";
+            if(!is.getItemMeta().getDisplayName().equals("")) {
+                name = is.getItemMeta().getDisplayName() + " ";
+            }
+            sender.sendMessage(" §4- §f" + name +
+                    "§4(§d" + is.getType().name() + "§4) §4x§d" + is.getAmount());
+        }
+        sender.sendMessage(" ");
+        sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
     }
 
 }

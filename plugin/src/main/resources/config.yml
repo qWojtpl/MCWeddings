@@ -53,6 +53,7 @@ config:
       #enchantments:
       #- DIG_SPEED:3
       #unbreakable: true
+      #execute: "say {0} just got the 1st reward!"
     7:
       item: EMERALD
       count: 12

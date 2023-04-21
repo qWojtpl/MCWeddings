@@ -23,6 +23,7 @@ public class MarriageManager {
 
     private final MCWeddings plugin = MCWeddings.getInstance();
     private final List<Marriage> marriages = new ArrayList<>();
+    private final HashMap<Integer, Reward> rewards = new HashMap<>();
     private final HashMap<String, List<String>> requests = new HashMap<>();
     private int bellCount = 0;
     private int bellTask = -1;
@@ -45,7 +46,7 @@ public class MarriageManager {
         }
         takeItems(p, slots, plugin.getDataHandler().getMarryCost());
         plugin.getServer().broadcastMessage(prefix + MessageFormat.format(plugin.getDataHandler().getMarryMessage(), first, second));
-        Marriage marriage = new Marriage(0, first, second, DateManager.getDate("-"), "d");
+        Marriage marriage = new Marriage(0, first, second, DateManager.getDate("."), "d");
         marriage.setId(plugin.getDataHandler().createMarriage(marriage));
         Location p1loc = p.getLocation();
         p1loc.setY(p1loc.getY() + 2);
@@ -96,6 +97,11 @@ public class MarriageManager {
         if(p == null) {
             sender.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getCannotFoundPlayer(), nickname));
             return;
+        } else {
+            if(!((Player) sender).canSee(p)) {
+                sender.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getCannotFoundPlayer(), nickname));
+                return;
+            }
         }
         if(getItemSlots((Player) sender, plugin.getDataHandler().getMarryCost()).size() < 1) {
             sender.sendMessage(prefix + "§cYou don't have required items to marry someone! Check requirements at /marry requirements");
@@ -189,7 +195,6 @@ public class MarriageManager {
         int goodItems = 0;
         for(ItemStack is : items) {
             int totalAmount = 0;
-            int lastSlot = -1;
             for(int i = 0; i < 36; i++) {
                 ItemStack inventoryItem = player.getInventory().getItem(i);
                 if(inventoryItem == null) continue;
@@ -205,11 +210,10 @@ public class MarriageManager {
                     }
                 }
                 totalAmount += inventoryItem.getAmount();
-                lastSlot = i;
+                slots.add(i);
             }
             if(totalAmount < is.getAmount()) return new ArrayList<>();
             goodItems++;
-            if(lastSlot != -1) slots.add(lastSlot);
         }
         if(goodItems < items.size()) return new ArrayList<>();
         return slots;
@@ -233,7 +237,9 @@ public class MarriageManager {
                     }
                 }
                 required -= inventoryItem.getAmount();
-                if(required <= 0) {
+                if(required > 0) {
+                    inventoryItem.setAmount(0);
+                } else {
                     inventoryItem.setAmount(-required);
                     break;
                 }

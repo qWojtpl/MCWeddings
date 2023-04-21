@@ -5,7 +5,11 @@ import java.util.Calendar;
 public class DateManager {
 
     public static String getDate(String splitter) {
-        return getDay() + splitter + getMonth() + splitter + getYear();
+        String month = getMonth() + "";
+        if(getMonth() < 10) {
+            month = "0" + month;
+        }
+        return getDay() + splitter + month + splitter + getYear();
     }
 
     public static int getDay() {
