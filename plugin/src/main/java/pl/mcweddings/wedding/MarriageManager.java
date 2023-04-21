@@ -77,6 +77,16 @@ public class MarriageManager {
                 bellCount++;
             }
         }, 0L, 10L);
+        if(plugin.isLuckPermsAvailable()) {
+            plugin.getLuckPermsManager().addMarriagePermission(p);
+            plugin.getLuckPermsManager().addSuffix(p,
+                    MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), marriage.getSuffix()));
+            if(p2 != null) {
+                plugin.getLuckPermsManager().addMarriagePermission(p2);
+                plugin.getLuckPermsManager().addSuffix(p2,
+                        MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), marriage.getSuffix()));
+            }
+        }
     }
 
     public void sendRequest(String nickname, CommandSender sender) {
@@ -145,6 +155,17 @@ public class MarriageManager {
         takenRewards.remove(m.getFirst());
         takenRewards.remove(m.getSecond());
         marriages.remove(m);
+        if(plugin.isLuckPermsAvailable()) {
+            plugin.getLuckPermsManager().removeMarriagePermission((Player) sender);
+            plugin.getLuckPermsManager().removeSuffix((Player) sender,
+                    MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), m.getSuffix()));
+            Player p2 = PlayerUtil.getPlayer(secondPlayer);
+            if(p2 != null) {
+                plugin.getLuckPermsManager().removeMarriagePermission(p2);
+                plugin.getLuckPermsManager().removeSuffix(p2,
+                        MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), m.getSuffix()));
+            }
+        }
     }
 
     public void getReward(CommandSender sender, String id) {
@@ -192,7 +213,8 @@ public class MarriageManager {
             }
         }
         if(r.getExecute() != null) {
-            plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), r.getExecute());
+            plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
+                    MessageFormat.format(r.getExecute(), sender.getName()));
         }
         plugin.getCommands().showRewards(sender);
     }

@@ -17,11 +17,13 @@ config:
 
   marryStatusPermission: "mcweddings.ismarried"
 
-  # Suffix schema. REQUIRES LUCKPERMS
+  # Suffix schema. {0} is a custom heart color
+  # REQUIRES LUCKPERMS
 
   suffixSchema: "&e[&{0}❤&e]&r"
 
   # Permission to change suffix color
+  # REQUIRES LUCKPERMS
 
   suffixColorPermission: "mcweddings.changesuffix"
 

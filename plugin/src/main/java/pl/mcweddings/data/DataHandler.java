@@ -27,6 +27,7 @@ public class DataHandler {
     private String divorcePermission;
     private String marryStatusPermission;
     private String suffixPermission;
+    private String suffixSchema;
     private int clearInterval;
     private String noPermission;
     private String marryMessage;
@@ -61,6 +62,7 @@ public class DataHandler {
         this.divorcePermission = yml.getString("config.divorcePermission");
         this.marryStatusPermission = yml.getString("config.marryStatusPermission");
         this.suffixPermission = yml.getString("config.suffixColorPermission");
+        this.suffixSchema = getYAMLString(yml, "config.suffixSchema");
         this.clearInterval = yml.getInt("config.clearInterval");
         runClearTask();
         this.prefix = getYAMLString(yml, "messages.prefix");

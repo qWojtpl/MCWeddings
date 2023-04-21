@@ -15,6 +15,7 @@ public class PermissionManager {
     private final HashMap<String, Permission> permissions = new HashMap<>();
 
     public void registerPermission(String permission, String description) {
+        if(permission == null || description == null) return;
         Permission perm = new Permission(permission, description);
         plugin.getServer().getPluginManager().removePermission(perm);
         plugin.getServer().getPluginManager().addPermission(perm);

@@ -5,6 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import pl.mcweddings.commands.CommandHelper;
 import pl.mcweddings.commands.Commands;
 import pl.mcweddings.data.DataHandler;
+import pl.mcweddings.events.Events;
 import pl.mcweddings.luckperms.LuckPermsManager;
 import pl.mcweddings.permissions.PermissionManager;
 import pl.mcweddings.wedding.MarriageManager;
@@ -19,6 +20,7 @@ public final class MCWeddings extends JavaPlugin {
     private LuckPermsManager luckPermsManager;
     private Commands commands;
     private CommandHelper commandHelper;
+    private Events events;
     private boolean luckPermsAvailable;
 
     @Override
@@ -34,9 +36,11 @@ public final class MCWeddings extends JavaPlugin {
         this.permissionManager = new PermissionManager();
         this.marriageManager = new MarriageManager();
         this.dataHandler = new DataHandler();
+        dataHandler.loadConfig();
         this.commands = new Commands();
         this.commandHelper = new CommandHelper();
-        dataHandler.loadConfig();
+        this.events = new Events();
+        getServer().getPluginManager().registerEvents(events, this);
         String[] cmds = {"marry", "divorce"};
         for(int i = 0; i < cmds.length; i++) {
             getCommand(cmds[i]).setExecutor(this.commands);
