@@ -17,6 +17,14 @@ config:
 
   marryStatusPermission: "mcweddings.ismarried"
 
+  # Suffix schema. REQUIRES LUCKPERMS
+
+  suffixSchema: "&e[&{0}❤&e]&r"
+
+  # Permission to change suffix color
+
+  suffixColorPermission: "mcweddings.changesuffix"
+
   # In seconds. Every this seconds all marry requests will be cleared
 
   clearInterval: 120
@@ -45,7 +53,8 @@ config:
   # Configure rewards
 
   rewards:
-    1: # How many days marry must be
+    "first_reward":
+      requiredDays: 1
       item: DIAMOND
       count: 2
       name: "Super diamonds!"
@@ -54,7 +63,8 @@ config:
       #- DIG_SPEED:3
       #unbreakable: true
       #execute: "say {0} just got the 1st reward!"
-    7:
+    "week_reward":
+      requiredDays: 7
       item: EMERALD
       count: 12
       #name: ""

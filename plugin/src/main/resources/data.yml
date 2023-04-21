@@ -1,13 +1,1 @@
-data:
-  0:
-    first: "FirstPlayerNickname"
-    second: "SecondPlayerNickname"
-    date: "19-04-2023"
-    suffix: "b"
-    rewards:
-      0:
-        1: true
-        7: false
-      1:
-        1: false
-        7: true
+data: []

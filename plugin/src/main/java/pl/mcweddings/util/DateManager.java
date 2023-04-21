@@ -23,7 +23,7 @@ public class DateManager {
     }
 
     public static int getMonth() {
-        return getCalendar().get(Calendar.MONTH);
+        return getCalendar().get(Calendar.MONTH)+1;
     }
 
     public static int getYear() {

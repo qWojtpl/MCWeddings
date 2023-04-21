@@ -9,12 +9,16 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.units.qual.A;
 import pl.mcweddings.MCWeddings;
 import pl.mcweddings.data.DataHandler;
 import pl.mcweddings.permissions.PermissionManager;
 import pl.mcweddings.util.DateManager;
 import pl.mcweddings.wedding.Marriage;
 import pl.mcweddings.wedding.Reward;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Commands implements CommandExecutor {
 
@@ -55,11 +59,7 @@ public class Commands implements CommandExecutor {
                 if(marry) {
                     if(args[0].equalsIgnoreCase("rewards")) {
                         if(args.length > 1) {
-                            try {
-                                plugin.getMarriageManager().getReward(sender, Integer.parseInt(args[1]));
-                            } catch(NumberFormatException e) {
-                                showRewards(sender);
-                            }
+                            plugin.getMarriageManager().getReward(sender, args[1]);
                         } else {
                             showRewards(sender);
                         }
@@ -110,15 +110,20 @@ public class Commands implements CommandExecutor {
         long daysOfMarriage = DateManager.calculateDays(playerMarriage.getDate(), DateManager.getDate("."));
         sender.sendMessage("§dDays of marriage: §c" + daysOfMarriage);
         sender.sendMessage("§dRewards for being married:");
+        List<String> takenRewards = plugin.getMarriageManager().getTakenRewards().getOrDefault(sender.getName(), new ArrayList<>());
         for(Reward reward : plugin.getMarriageManager().getRewards()) {
+            if(takenRewards.contains(reward.getId())) continue;
             int day = reward.getDay();
             ItemStack is = reward.getItemStack();
-            String rewardDescription = (daysOfMarriage < day) ? "§4(§cremaining " + (day - daysOfMarriage) + " days§4)" : "§4(§aREADY§4)";
-            String hoverDescription = (daysOfMarriage < day) ? "§c§lRequires " + day + " days of marriage!" : "§a§lClick to receive reward!";
-            String rewardText = is.getItemMeta().getDisplayName() + "\n§4(§d" + is.getType() + "§4) x§d" + is.getAmount() + "\n" + hoverDescription;
+            String rewardDescription =
+                    (daysOfMarriage < day) ? "§4(§cremaining " + (day - daysOfMarriage) + " days§4)" : "§4(§aREADY§4)";
+            String hoverDescription =
+                    (daysOfMarriage < day) ? "§c§lRequires " + day + " days of marriage!" : "§a§lClick to receive reward!";
+            String rewardText = is.getItemMeta().getDisplayName() +
+                    "\n§4(§d" + is.getType() + "§4) x§d" + is.getAmount() + "\n" + hoverDescription;
             TextComponent component = new TextComponent("§4- §d" + day + " days " + rewardDescription);
             component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(rewardText).create()));
-            component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/marry rewards " + day));
+            component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/marry rewards " + reward.getId()));
             sender.spigot().sendMessage(component);
         }
         sender.sendMessage(" ");
@@ -137,6 +142,8 @@ public class Commands implements CommandExecutor {
         sender.sendMessage(" ");
         sender.sendMessage("§d§l" + first + " §4❤ §d§l" + second);
         sender.sendMessage("§dMarriage date: §c" + m.getDate());
+        sender.sendMessage("§dMarriage length: §c" +
+                DateManager.calculateDays(m.getDate(), DateManager.getDate(".")) + " days");
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
     }

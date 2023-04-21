@@ -24,11 +24,12 @@ public class MarriageManager {
     private final MCWeddings plugin = MCWeddings.getInstance();
     private final List<Marriage> marriages = new ArrayList<>();
     private final List<Reward> rewards = new ArrayList<>();
+    private final HashMap<String, List<String>> takenRewards = new HashMap<>();
     private final HashMap<String, List<String>> requests = new HashMap<>();
     private int bellCount = 0;
     private int bellTask = -1;
     @Setter
-    private int killRequestsTask = -1;
+    private int clearRequestsTask = -1;
 
     public void createMarriage(String first, String second, CommandSender sender) {
         String prefix = plugin.getDataHandler().getPrefix();
@@ -37,6 +38,11 @@ public class MarriageManager {
         if(p == null) {
             sender.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getCannotFoundPlayer(), first));
             return;
+        } else {
+            if(!((Player) sender).canSee(p)) {
+                sender.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getCannotFoundPlayer(), first));
+                return;
+            }
         }
         List<Integer> slots = getItemSlots(p, plugin.getDataHandler().getMarryCost());
         if(slots.size() < 1) {
@@ -136,10 +142,12 @@ public class MarriageManager {
             player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 1.0F, 3.0F);
         }
         plugin.getDataHandler().removeMarriage(m);
+        takenRewards.remove(m.getFirst());
+        takenRewards.remove(m.getSecond());
         marriages.remove(m);
     }
 
-    public void getReward(CommandSender sender, int reward) {
+    public void getReward(CommandSender sender, String id) {
         String prefix = plugin.getDataHandler().getPrefix();
         if(!(sender instanceof Player)) {
             sender.sendMessage(prefix + plugin.getDataHandler().getMustBePlayer());
@@ -152,7 +160,7 @@ public class MarriageManager {
         }
         Reward r = null;
         for(Reward rew : getRewards()) {
-            if(rew.getDay() == reward) {
+            if(rew.getId().equals(id)) {
                 r = rew;
                 break;
             }
@@ -166,8 +174,16 @@ public class MarriageManager {
             sender.sendMessage(prefix + "§cYou can't receive this reward yet!");
             return;
         }
+        List<String> takenRewards = getTakenRewards().getOrDefault(sender.getName(), new ArrayList<>());
+        if(takenRewards.contains(r.getId())) {
+            sender.sendMessage(prefix + "§cYou've already received this reward!");
+            return;
+        }
         Player p = PlayerUtil.getPlayer(sender.getName());
         if(p == null) return;
+        takenRewards.add(r.getId());
+        getTakenRewards().put(sender.getName(), takenRewards);
+        plugin.getDataHandler().takeReward(m, r.getId(), sender.getName());
         ItemStack is = new ItemStack(r.getItemStack());
         HashMap<Integer, ItemStack> another = p.getInventory().addItem(is);
         if(another.size() > 0) {
@@ -178,6 +194,7 @@ public class MarriageManager {
         if(r.getExecute() != null) {
             plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), r.getExecute());
         }
+        plugin.getCommands().showRewards(sender);
     }
 
     public boolean isPlayerMarried(String nickname) {

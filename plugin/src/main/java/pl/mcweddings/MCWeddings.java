@@ -17,6 +17,8 @@ public final class MCWeddings extends JavaPlugin {
     private PermissionManager permissionManager;
     private MarriageManager marriageManager;
     private LuckPermsManager luckPermsManager;
+    private Commands commands;
+    private CommandHelper commandHelper;
     private boolean luckPermsAvailable;
 
     @Override
@@ -32,11 +34,13 @@ public final class MCWeddings extends JavaPlugin {
         this.permissionManager = new PermissionManager();
         this.marriageManager = new MarriageManager();
         this.dataHandler = new DataHandler();
+        this.commands = new Commands();
+        this.commandHelper = new CommandHelper();
         dataHandler.loadConfig();
-        String[] commands = {"marry", "divorce"};
-        for(int i = 0; i < commands.length; i++) {
-            getCommand(commands[i]).setExecutor(new Commands());
-            getCommand(commands[i]).setTabCompleter(new CommandHelper());
+        String[] cmds = {"marry", "divorce"};
+        for(int i = 0; i < cmds.length; i++) {
+            getCommand(cmds[i]).setExecutor(this.commands);
+            getCommand(cmds[i]).setTabCompleter(this.commandHelper);
         }
         getLogger().info("Loaded.");
     }
