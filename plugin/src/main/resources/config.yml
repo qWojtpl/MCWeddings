@@ -71,6 +71,13 @@ config:
       #lore:
       #- "Some lore"
 
+# You can replace default arguments with custom ones (e.g. you want to translate plugin)
+args-aliases:
+  requirements: "requirements"
+  status: "status"
+  rewards: "rewards"
+  color: "color"
+
 messages:
 
   # Prefix for commands
@@ -115,11 +122,14 @@ messages:
   # Message when someone is not married
   notMarried: "&cYou're not married!"
 
+  # Message when another player is not married
+  playerNotMarried: "&cThis player is not married!"
+
   # Message when someone want to marry and doesn't have required items
   marryNoRequiredItems: "&cYou don't have required items to marry someone! Check requirements at /marry requirements"
 
   # Message when someone want to divorce and doesn't have required items
-  divorceNoRequiredItems: "§cYou don't have required items to get divorced! Check requirements at /divorce requirements"
+  divorceNoRequiredItems: "&cYou don't have required items to get divorced! Check requirements at /divorce requirements"
 
   # Message when second player doesn't have enough items to marry
   partnerWithoutItems: "&cYour partner doesn't have required items. You can't marry right now."
@@ -150,3 +160,27 @@ messages:
 
   # Message when reward is already received
   rewardReceived: "&cYou've already received this reward!"
+
+  # Simple words section
+  marriageDate: "&dMarriage date: &c{0}"
+  marriageLength: "&dDays of marriage: &c{0}"
+  suffix: "&dSuffix: {0}"
+  marriageRequirements: "&dMarriage requirements:"
+  divorceRequirements: "&dDivorce requirements:"
+  rewards: "&dRewards for being married:"
+  remaining: "&cRemaining {0} days"
+  ready: "&aREADY"
+  clickToReceive: "&a&lClick to receive reward!"
+  requiresDaysOfMarriage: "&c&lRequires {0} days of marriage!"
+  days: "days"
+  correctUsage: "&cCorrect usage: {0}"
+
+  # Command help section
+  help-marry: "&d/marry <nick> &4- &cMarry a player (or accept request)"
+  help-mRequirements: "&d/marry requirements &4- &cRequirements for getting married"
+  help-rewards: "&d/marry rewards &4- &cRewards for being married"
+  help-status: "&d/marry status [nick] &4- &cStatus of your marriage"
+  help-color: "&d/marry color <color> &4- &cSet suffix color"
+  help-divorce: "&d/divorce &4- &cDivorce with player"
+  help-dRequirements: "&d/divorce requirements &4- &cRequirements for getting divorced"
+  help-reload: "&d/marry reload &4- &cReload configuration and data"

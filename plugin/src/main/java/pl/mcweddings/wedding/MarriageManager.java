@@ -98,8 +98,8 @@ public class MarriageManager {
                 plugin.getLuckPermsManager().addSuffix(p2, marriage.getSuffix());
             }
         }
-        colorChanges.add(p.getName());
-        colorChanges.add(p2.getName());
+        createColorCooldown(p.getName());
+        createColorCooldown(p2.getName());
     }
 
     public void sendRequest(String nickname, CommandSender sender) {
@@ -231,12 +231,8 @@ public class MarriageManager {
         if(!p1.equals(p2)) plugin.getLuckPermsManager().updateSuffix(p2, m.getSuffix(), newSuffix);
         m.setSuffix(newSuffix);
         plugin.getDataHandler().updateSuffix(m, m.getSuffix());
-        colorChanges.add(p1.getName());
-        colorChanges.add(p2.getName());
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            colorChanges.remove(p1.getName());
-            colorChanges.remove(p2.getName());
-        }, 20L * plugin.getDataHandler().getSuffixCooldown());
+        createColorCooldown(p1.getName());
+        createColorCooldown(p2.getName());
         sender.sendMessage(prefix + messages.getMessage("changedSuffix"));
     }
 
@@ -331,6 +327,13 @@ public class MarriageManager {
             req.remove(from);
             requests.put(to, req);
         }, 20L * plugin.getDataHandler().getRequestCooldown());
+    }
+
+    public void createColorCooldown(String nickname) {
+        colorChanges.add(nickname);
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            colorChanges.remove(nickname);
+        }, 20L * plugin.getDataHandler().getSuffixCooldown());
     }
 
     public boolean checkMarriage(String first, String second, CommandSender sender) {

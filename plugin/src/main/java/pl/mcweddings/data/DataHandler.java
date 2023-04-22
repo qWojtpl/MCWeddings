@@ -32,6 +32,10 @@ public class DataHandler {
     private String suffixPermission;
     private String suffixColors;
     private String suffixSchema;
+    private String requirementsAlias;
+    private String statusAlias;
+    private String rewardsAlias;
+    private String colorAlias;
     private int maxDataIndex;
     private int requestCooldown;
     private int suffixCooldown;
@@ -59,6 +63,10 @@ public class DataHandler {
             this.suffixCooldown = yml.getInt("config.suffixCooldown");
         }
         this.requestCooldown = yml.getInt("config.requestCooldown");
+        this.requirementsAlias = yml.getString("args-aliases.requirements", "requirements");
+        this.statusAlias = yml.getString("args-aliases.status", "status");
+        this.rewardsAlias = yml.getString("args-aliases.rewards", "rewards");
+        this.colorAlias = yml.getString("args-aliases.color", "color");
         PermissionManager pm = plugin.getPermissionManager();
         pm.registerPermission(managePermission, "Manage MCWeddings plugin");
         pm.registerPermission(marryPermission, "Permission to marry other player");

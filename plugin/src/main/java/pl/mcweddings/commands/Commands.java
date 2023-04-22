@@ -16,6 +16,7 @@ import pl.mcweddings.util.DateManager;
 import pl.mcweddings.wedding.Marriage;
 import pl.mcweddings.wedding.Reward;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class Commands implements CommandExecutor {
                     return true;
                 }
             }
-            if(args[0].equalsIgnoreCase("requirements")) {
+            if(args[0].equalsIgnoreCase(dataHandler.getRequirementsAlias())) {
                 if(marry) {
                     marriageRequirements(sender);
                 } else {
@@ -57,20 +58,25 @@ public class Commands implements CommandExecutor {
                 }
             } else {
                 if(marry) {
-                    if(args[0].equalsIgnoreCase("rewards")) {
+                    if(args[0].equalsIgnoreCase(dataHandler.getRewardsAlias())) {
                         if(args.length > 1) {
                             plugin.getMarriageManager().getReward(sender, args[1]);
                         } else {
                             showRewards(sender);
                         }
-                    } else if(args[0].equalsIgnoreCase("status")) {
-                        showStatus(sender);
-                    } else if(args[0].equalsIgnoreCase("color")) {
+                    } else if(args[0].equalsIgnoreCase(dataHandler.getStatusAlias())) {
+                        if(args.length > 1) {
+                            showStatus(sender, args[1]);
+                        } else {
+                            showStatus(sender, sender.getName());
+                        }
+                    } else if(args[0].equalsIgnoreCase(dataHandler.getColorAlias())) {
                         if(args.length > 1) {
                             plugin.getMarriageManager().changeSuffix(sender, args[1]);
                         } else {
                             sender.sendMessage(messages.getMessage("prefix") +
-                                    "§cCorrect usage: /marry color <color:" + dataHandler.getSuffixColors() + ">");
+                                    MessageFormat.format(messages.getMessage("correctUsage"),
+                                            "/marry color <" + args[1] + ":" + dataHandler.getSuffixColors() + ">"));
                         }
                     } else {
                         plugin.getMarriageManager().sendRequest(args[0], sender);
@@ -92,18 +98,18 @@ public class Commands implements CommandExecutor {
     public void showHelp(CommandSender sender) {
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
         sender.sendMessage(" ");
-        sender.sendMessage("§d/marry <nick> §4- §cMarry a player (or accept request)");
-        sender.sendMessage("§d/marry requirements §4- §cRequirements for getting married");
-        sender.sendMessage("§d/marry rewards §4- §cRewards for being married");
-        sender.sendMessage("§d/marry status §4- §cStatus of your marriage");
+        sender.sendMessage(messages.getMessage("help-marry"));
+        sender.sendMessage(messages.getMessage("help-mRequirements"));
+        sender.sendMessage(messages.getMessage("help-rewards"));
+        sender.sendMessage(messages.getMessage("help-status"));
         if(plugin.isLuckPermsAvailable()) {
-            sender.sendMessage("§d/marry color <color> §4- §cSet suffix color");
+            sender.sendMessage(messages.getMessage("help-color"));
         }
-        sender.sendMessage("§d/divorce §4- §cDivorce with player");
-        sender.sendMessage("§d/divorce requirements §4- §cRequirements for getting divorced");
+        sender.sendMessage(messages.getMessage("help-divorce"));
+        sender.sendMessage(messages.getMessage("help-dRequirements"));
         if(sender.hasPermission(permissionManager.getPermission(dataHandler.getManagePermission()))) {
-            sender.sendMessage("§4--------- §dAdmin commands §4---------");
-            sender.sendMessage("§d/marry reload §4- §cReload configuration and data");
+            sender.sendMessage("§4----------------------------------");
+            sender.sendMessage(messages.getMessage("help-reload"));
         }
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
@@ -118,32 +124,39 @@ public class Commands implements CommandExecutor {
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
         sender.sendMessage(" ");
         long daysOfMarriage = DateManager.calculateDays(playerMarriage.getDate(), DateManager.getDate("."));
-        sender.sendMessage("§dDays of marriage: §c" + daysOfMarriage);
-        sender.sendMessage("§dRewards for being married:");
+        sender.sendMessage(MessageFormat.format(messages.getMessage("marriageLength"), daysOfMarriage));
+        sender.sendMessage(messages.getMessage("rewards"));
         List<String> takenRewards = plugin.getMarriageManager().getTakenRewards().getOrDefault(sender.getName(), new ArrayList<>());
         for(Reward reward : plugin.getMarriageManager().getRewards()) {
             if(takenRewards.contains(reward.getId())) continue;
             int day = reward.getDay();
             ItemStack is = reward.getItemStack();
             String rewardDescription =
-                    (daysOfMarriage < day) ? "§4(§cremaining " + (day - daysOfMarriage) + " days§4)" : "§4(§aREADY§4)";
+                    (daysOfMarriage < day) ? "§4(" + MessageFormat.format(messages.getMessage("remaining"),
+                            (day - daysOfMarriage)) + "§4)" : "§4(" + messages.getMessage("ready") + "§4)";
             String hoverDescription =
-                    (daysOfMarriage < day) ? "§c§lRequires " + day + " days of marriage!" : "§a§lClick to receive reward!";
+                    (daysOfMarriage < day) ? MessageFormat.format(messages.getMessage("requiresDaysOfMarriage"), day)
+                            : messages.getMessage("clickToReceive");
             String rewardText = is.getItemMeta().getDisplayName() +
                     "\n§4(§d" + is.getType() + "§4) x§d" + is.getAmount() + "\n" + hoverDescription;
-            TextComponent component = new TextComponent("§4- §d" + day + " days " + rewardDescription);
+            TextComponent component = new TextComponent("§4- §d" + day + " " + messages.getMessage("days") + " " + rewardDescription);
             component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(rewardText).create()));
-            component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/marry rewards " + reward.getId()));
+            component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                    "/marry " + dataHandler.getRewardsAlias() + " " + reward.getId()));
             sender.spigot().sendMessage(component);
         }
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
     }
 
-    public void showStatus(CommandSender sender) {
-        Marriage m = plugin.getMarriageManager().getPlayerMarriage(sender.getName());
+    public void showStatus(CommandSender sender, String player) {
+        Marriage m = plugin.getMarriageManager().getPlayerMarriage(player);
         if(m == null) {
-            sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("notMarried"));
+            if(sender.getName().equals(player)) {
+                sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("notMarried"));
+            } else {
+                sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("playerNotMarried"));
+            }
             return;
         }
         String first = m.getFirst();
@@ -151,16 +164,16 @@ public class Commands implements CommandExecutor {
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
         sender.sendMessage(" ");
         sender.sendMessage("§d§l" + first + " §4❤ §d§l" + second);
-        sender.sendMessage("§dMarriage date: §c" + m.getDate());
-        sender.sendMessage("§dMarriage length: §c" +
-                DateManager.calculateDays(m.getDate(), DateManager.getDate(".")) + " days");
+        sender.sendMessage(MessageFormat.format(messages.getMessage("marriageDate"), m.getDate()));
+        sender.sendMessage(MessageFormat.format(messages.getMessage("marriageLength"),
+                DateManager.calculateDays(m.getDate(), DateManager.getDate("."))));
         if(plugin.isLuckPermsAvailable()) {
             String[] suffixSplit = m.getSuffix().split("&");
             String suffix = "";
             for(int i = 1; i < suffixSplit.length; i++) {
                 suffix += "§" + suffixSplit[i];
             }
-            sender.sendMessage("§dSuffix: " + suffix);
+            sender.sendMessage(MessageFormat.format(messages.getMessage("suffix"), suffix));
         }
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
@@ -169,7 +182,7 @@ public class Commands implements CommandExecutor {
     public void marriageRequirements(CommandSender sender) {
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
         sender.sendMessage(" ");
-        sender.sendMessage("§dMarriage requirements:");
+        sender.sendMessage(messages.getMessage("marriageRequirements"));
         for(ItemStack is : dataHandler.getMarryCost()) {
             String name = "";
             if(!is.getItemMeta().getDisplayName().equals("")) {
@@ -185,7 +198,7 @@ public class Commands implements CommandExecutor {
     public void divorceRequirements(CommandSender sender) {
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
         sender.sendMessage(" ");
-        sender.sendMessage("§dDivorce requirements:");
+        sender.sendMessage(messages.getMessage("divorceRequirements"));
         for(ItemStack is : dataHandler.getDivorceCost()) {
             String name = "";
             if(!is.getItemMeta().getDisplayName().equals("")) {
