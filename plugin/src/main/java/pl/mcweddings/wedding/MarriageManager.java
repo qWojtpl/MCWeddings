@@ -51,7 +51,7 @@ public class MarriageManager {
             sender.sendMessage(MessageFormat.format(prefix + messages.getMessage("cannotFoundPlayer"), first));
             return;
         } else {
-            if(!((Player) sender).canSee(p)) {
+            if(PlayerUtil.isVanished(p)) {
                 sender.sendMessage(MessageFormat.format(prefix + messages.getMessage("cannotFoundPlayer"), first));
                 return;
             }
@@ -62,10 +62,14 @@ public class MarriageManager {
             sender.sendMessage(prefix + messages.getMessage("partnerWithoutItems"));
             return;
         }
+        String suffix = "";
+        if(plugin.isLuckPermsAvailable()) {
+            suffix = MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), "d");
+        }
         takeItems(p, slots, plugin.getDataHandler().getMarryCost());
         plugin.getServer().broadcastMessage(prefix + MessageFormat.format(messages.getMessage("marryMessage"), first, second));
         Marriage marriage = new Marriage(0, first, second, DateManager.getDate("."),
-                MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), "d"));
+                suffix);
         marriage.setId(plugin.getDataHandler().createMarriage(marriage));
         Location p1loc = p.getLocation();
         p1loc.setY(p1loc.getY() + 2);
@@ -108,10 +112,10 @@ public class MarriageManager {
             sender.sendMessage(prefix + messages.getMessage("mustBePlayer"));
             return;
         }
-        /*if(nickname.equals(sender.getName())) {
+        if(nickname.equals(sender.getName())) {
             sender.sendMessage(prefix + messages.getMessage("marryHimself"));
             return;
-        }*/
+        }
         if(!checkMarriage(sender.getName(), nickname, sender)) return;
         if(hasRequest(sender.getName(), nickname)) {
             clearRequests(sender.getName());
@@ -127,7 +131,7 @@ public class MarriageManager {
             sender.sendMessage(MessageFormat.format(prefix + messages.getMessage("cannotFoundPlayer"), nickname));
             return;
         } else {
-            if(!((Player) sender).canSee(p)) {
+            if(PlayerUtil.isVanished(p)) {
                 sender.sendMessage(MessageFormat.format(prefix + messages.getMessage("cannotFoundPlayer"), nickname));
                 return;
             }
@@ -358,9 +362,7 @@ public class MarriageManager {
             for(int i = 0; i < 36; i++) {
                 ItemStack inventoryItem = player.getInventory().getItem(i);
                 if(inventoryItem == null) continue;
-                if(!is.getType().equals(Material.AIR)) {
-                    if(!inventoryItem.getType().equals(is.getType())) continue;
-                }
+                if(!inventoryItem.getType().equals(is.getType())) continue;
                 if(!inventoryItem.getItemMeta().getDisplayName().equals(is.getItemMeta().getDisplayName())) continue;
                 if(inventoryItem.getItemMeta().getLore() == null && is.getItemMeta().getLore() != null) continue;
                 if(inventoryItem.getItemMeta().getLore() != null && is.getItemMeta().getLore() == null) continue;
@@ -385,9 +387,7 @@ public class MarriageManager {
             for(int slot : checkSlots) {
                 ItemStack inventoryItem = player.getInventory().getItem(slot);
                 if(inventoryItem == null) continue;
-                if(!is.getType().equals(Material.AIR)) {
-                    if(!inventoryItem.getType().equals(is.getType())) continue;
-                }
+                if(!inventoryItem.getType().equals(is.getType())) continue;
                 if(!inventoryItem.getItemMeta().getDisplayName().equals(is.getItemMeta().getDisplayName())) continue;
                 if(inventoryItem.getItemMeta().getLore() == null && is.getItemMeta().getLore() != null) continue;
                 if(inventoryItem.getItemMeta().getLore() != null && is.getItemMeta().getLore() == null) continue;

@@ -106,6 +106,7 @@ public class DataHandler {
                 ItemStack is = new ItemStack(m);
                 is.setAmount(yml.getInt(path + ".count"));
                 ItemMeta meta = is.getItemMeta();
+                if(meta == null) continue;
                 String name = yml.getString(path + ".name");
                 if(name != null) {
                     meta.setDisplayName(name.replace('&', '§'));
@@ -132,18 +133,19 @@ public class DataHandler {
         for(String key : section.getKeys(false)) {
             String path = "config.rewards." + key;
             int day = yml.getInt(path + ".requiredDays");
-            Material m = Material.AIR;
+            Material m = Material.DIRT;
             String item = yml.getString(path + ".item");
             if(item != null) {
                 m = Material.getMaterial(item);
                 if(m == null) {
-                    m = Material.AIR;
+                    m = Material.DIRT;
                     plugin.getLogger().warning("Cannot compare " + item + " with a correct material!");
                 }
             }
             ItemStack is = new ItemStack(m);
             is.setAmount(yml.getInt(path + ".count"));
             ItemMeta meta = is.getItemMeta();
+            if(meta == null) continue;
             String name = yml.getString(path + ".name");
             if(name != null) {
                 meta.setDisplayName(name.replace('&', '§'));

@@ -36,11 +36,14 @@ public class Commands implements CommandExecutor {
                 return true;
             }
             marry = true;
-        } else {
+        } else if(label.equalsIgnoreCase("rozwod") || label.equalsIgnoreCase("divorce")) {
             if(!sender.hasPermission(permissionManager.getPermission(dataHandler.getDivorcePermission()))) {
                 sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("noPermission"));
                 return true;
             }
+        } else {
+            sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("cantDoIt"));
+            return true;
         }
         if(args.length > 0) {
             if(sender.hasPermission(permissionManager.getPermission(dataHandler.getManagePermission()))) {
@@ -70,7 +73,7 @@ public class Commands implements CommandExecutor {
                         } else {
                             showStatus(sender, sender.getName());
                         }
-                    } else if(args[0].equalsIgnoreCase(dataHandler.getColorAlias())) {
+                    } else if(args[0].equalsIgnoreCase(dataHandler.getColorAlias()) && plugin.isLuckPermsAvailable()) {
                         if(args.length > 1) {
                             plugin.getMarriageManager().changeSuffix(sender, args[1]);
                         } else {
