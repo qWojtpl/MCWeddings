@@ -1,38 +1,37 @@
 config:
 
   # Manage plugin permission
-
   managePermission: "mcweddings.manage"
 
   # Permission to marry someone
-
   marryPermission: "mcweddings.marry"
 
   # Permission to divorce
-
   divorcePermission: "mcweddings.divorce"
 
-  # Player will have this permission when is married
-  # REQUIRES LUCKPERMS
+  # <================> THIS SECTION REQUIRES LUCKPERMS <================>
 
+  # Player will have this permission when is married
   marryStatusPermission: "mcweddings.ismarried"
 
-  # Suffix schema. {0} is a custom heart color
-  # REQUIRES LUCKPERMS
+  # Suffix schema. {0} is a custom heart color.
+  suffixSchema: "suffix.150.&e[&{0}❤&e]&r"
 
-  suffixSchema: "&e[&{0}❤&e]&r"
+  # Suffix available colors.
+  suffixColors: "d49bc5a"
 
   # Permission to change suffix color
-  # REQUIRES LUCKPERMS
-
   suffixColorPermission: "mcweddings.changesuffix"
 
-  # In seconds. Every this seconds all marry requests will be cleared
+  # In seconds. After this seconds player can change suffix again
+  suffixCooldown: 60
 
-  clearInterval: 120
+  # <================> THIS SECTION REQUIRES LUCKPERMS <================>
+
+  # In seconds. After this seconds player can send marry requests again to player
+  requestCooldown: 120
 
   # Cost for marry/divorce. Can be any item.
-
   cost:
     marry:
       0:
@@ -53,7 +52,6 @@ config:
         name: "Divorce rose"
 
   # Configure rewards
-
   rewards:
     "first_reward":
       requiredDays: 1
@@ -76,53 +74,79 @@ config:
 messages:
 
   # Prefix for commands
-
   prefix: "&d[&cMCWeddings&d] "
 
   # Message if player don't have permission and tried to execute a command
-
   noPermission: "&cYou don't have permission!"
 
   # Broadcast marry message. {0} is first player, {1} is second player
-
   marryMessage: "&a{0} is now married with {1}!"
 
   # Divorce message. {0} is first player, {1} is second player
-
   divorceMessage: "&c{0} is no longer married with {1}!"
 
   # Marriage inquiry message. {0} is first player.
-
   marriageInquiryMessage: "&a{0} want to marry with you. Type /marry {0} to accept!"
 
-  # Marry request send message. {0} is second player.
-
-  marryRequestSentMessage: "&aSent marry request to {0}."
-
   # Message will be sent if player is not online. {0} is a player.
-
   cannotFoundPlayer: "&cCannot found player: {0}"
 
   # Message to console if console decide to marry someone
-
   mustBePlayer: "&cYou must be a player!"
 
   # Message if someone decide to marry himself
-
   marryHimself: "&cYou can't marry yourself."
 
   # Message if someone will send requests two times or more
-
   requestAlreadySent: "&cYou've already sent request to this player!"
 
   # Message when someone send request to another player. {0} is another player.
-
   requestSent: "&aSent marry request to {0}!"
 
-  # Message when someone tries to marry another married player.
+  # Message when someone divorce with another player. {0} is another player
+  successfullyDivorced: "&aYou successfully divorced with {0}"
 
+  # Message when someone tries to marry another married player.
   playerAlreadyMarried: "&cThis player is already married!"
   
   # Message when someone tries to marry another player while being married
-  
   youAreMarried: "&cYou're already married!"
+
+  # Message when someone is not married
+  notMarried: "&cYou're not married!"
+
+  # Message when someone want to marry and doesn't have required items
+  marryNoRequiredItems: "&cYou don't have required items to marry someone! Check requirements at /marry requirements"
+
+  # Message when someone want to divorce and doesn't have required items
+  divorceNoRequiredItems: "§cYou don't have required items to get divorced! Check requirements at /divorce requirements"
+
+  # Message when second player doesn't have enough items to marry
+  partnerWithoutItems: "&cYour partner doesn't have required items. You can't marry right now."
+
+  # Message when LuckPerms is not available and someone want to change suffix color
+  cantDoIt: "&cSorry, you can't do it right now."
+
+  # Message when someone want to use color which is not listed in config
+  cantUseColor: "&cYou can't use this color! Available colors: "
+
+  # Message when someone want to change suffix and second player in marriage is not online
+  partnerMustBeOnline: "&cYour partner must be online to change suffix color!"
+
+  # Message when cooldown is active and someone want to change suffix
+  suffixHasCooldown: "&cPlease wait a while before changing suffix color again!"
+
+  # Message when someone want to change color suffix to color which is already active
+  suffixActive: "&cYou already have suffix in this color!"
+
+  # Message when suffix will be changed
+  changedSuffix: "&aChanged suffix color."
+
+  # Message when system cannot find requested reward
+  cannotFindReward: "&cCannot find this reward!"
+
+  # Message when player can't receive reward (doesn't have required days)
+  cantReceiveReward: "&cYou can't receive this reward yet!"
+
+  # Message when reward is already received
+  rewardReceived: "&cYou've already received this reward!"

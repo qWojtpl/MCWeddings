@@ -3,22 +3,15 @@ package pl.mcweddings.data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashMap;
+
 @Getter
-@Setter
 public class Messages {
 
-    private String prefix;
-    private String noPermission;
-    private String marryMessage;
-    private String divorceMessage;
-    private String marriageInquiryMessage;
-    private String marryRequestSentMessage;
-    private String cannotFoundPlayer;
-    private String mustBePlayer;
-    private String marryHimself;
-    private String requestAlreadySent;
-    private String requestSent;
-    private String playerAlreadyMarried;
-    private String youAreMarried;
+    private final HashMap<String, String> messages = new HashMap<>();
+
+    public String getMessage(String key) {
+        return messages.getOrDefault(key, "null");
+    }
 
 }

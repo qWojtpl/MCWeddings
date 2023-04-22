@@ -1,6 +1,5 @@
 package pl.mcweddings.commands;
 
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -17,7 +16,6 @@ import pl.mcweddings.util.DateManager;
 import pl.mcweddings.wedding.Marriage;
 import pl.mcweddings.wedding.Reward;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,13 +31,13 @@ public class Commands implements CommandExecutor {
         boolean marry = false;
         if(label.equalsIgnoreCase("marry") || label.equalsIgnoreCase("slub")) {
             if(!sender.hasPermission(permissionManager.getPermission(dataHandler.getMarryPermission()))) {
-                sender.sendMessage(messages.getPrefix() + messages.getNoPermission());
+                sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("noPermission"));
                 return true;
             }
             marry = true;
         } else {
             if(!sender.hasPermission(permissionManager.getPermission(dataHandler.getDivorcePermission()))) {
-                sender.sendMessage(messages.getPrefix() + messages.getNoPermission());
+                sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("noPermission"));
                 return true;
             }
         }
@@ -47,7 +45,7 @@ public class Commands implements CommandExecutor {
             if(sender.hasPermission(permissionManager.getPermission(dataHandler.getManagePermission()))) {
                 if(args[0].equalsIgnoreCase("reload")) {
                     dataHandler.loadConfig();
-                    sender.sendMessage(messages.getPrefix() + "§aReloaded!");
+                    sender.sendMessage(messages.getMessage("prefix") + "§aReloaded!");
                     return true;
                 }
             }
@@ -68,7 +66,12 @@ public class Commands implements CommandExecutor {
                     } else if(args[0].equalsIgnoreCase("status")) {
                         showStatus(sender);
                     } else if(args[0].equalsIgnoreCase("color")) {
-
+                        if(args.length > 1) {
+                            plugin.getMarriageManager().changeSuffix(sender, args[1]);
+                        } else {
+                            sender.sendMessage(messages.getMessage("prefix") +
+                                    "§cCorrect usage: /marry color <color:" + dataHandler.getSuffixColors() + ">");
+                        }
                     } else {
                         plugin.getMarriageManager().sendRequest(args[0], sender);
                     }
@@ -89,11 +92,13 @@ public class Commands implements CommandExecutor {
     public void showHelp(CommandSender sender) {
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
         sender.sendMessage(" ");
-        sender.sendMessage("§d/marry <nick> §4- §cMarry a plyer (or accept request)");
+        sender.sendMessage("§d/marry <nick> §4- §cMarry a player (or accept request)");
         sender.sendMessage("§d/marry requirements §4- §cRequirements for getting married");
         sender.sendMessage("§d/marry rewards §4- §cRewards for being married");
         sender.sendMessage("§d/marry status §4- §cStatus of your marriage");
-        sender.sendMessage("§d/marry color §4- §cSet suffix color");
+        if(plugin.isLuckPermsAvailable()) {
+            sender.sendMessage("§d/marry color <color> §4- §cSet suffix color");
+        }
         sender.sendMessage("§d/divorce §4- §cDivorce with player");
         sender.sendMessage("§d/divorce requirements §4- §cRequirements for getting divorced");
         if(sender.hasPermission(permissionManager.getPermission(dataHandler.getManagePermission()))) {
@@ -107,7 +112,7 @@ public class Commands implements CommandExecutor {
     public void showRewards(CommandSender sender) {
         Marriage playerMarriage = plugin.getMarriageManager().getPlayerMarriage(sender.getName());
         if(playerMarriage == null) {
-            sender.sendMessage(messages.getPrefix() + "§cYou're not married");
+            sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("notMarried"));
             return;
         }
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
@@ -138,7 +143,7 @@ public class Commands implements CommandExecutor {
     public void showStatus(CommandSender sender) {
         Marriage m = plugin.getMarriageManager().getPlayerMarriage(sender.getName());
         if(m == null) {
-            sender.sendMessage(messages.getPrefix() + "§cYou're not married");
+            sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("notMarried"));
             return;
         }
         String first = m.getFirst();
@@ -150,8 +155,12 @@ public class Commands implements CommandExecutor {
         sender.sendMessage("§dMarriage length: §c" +
                 DateManager.calculateDays(m.getDate(), DateManager.getDate(".")) + " days");
         if(plugin.isLuckPermsAvailable()) {
-            sender.sendMessage("§dSuffix: " +
-                    MessageFormat.format(dataHandler.getSuffixSchema(), m.getSuffix()));
+            String[] suffixSplit = m.getSuffix().split("&");
+            String suffix = "";
+            for(int i = 1; i < suffixSplit.length; i++) {
+                suffix += "§" + suffixSplit[i];
+            }
+            sender.sendMessage("§dSuffix: " + suffix);
         }
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");

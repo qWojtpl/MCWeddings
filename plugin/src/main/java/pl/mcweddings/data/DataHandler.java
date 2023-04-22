@@ -1,13 +1,13 @@
 package pl.mcweddings.data;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.yaml.snakeyaml.Yaml;
 import pl.mcweddings.MCWeddings;
 import pl.mcweddings.permissions.PermissionManager;
 import pl.mcweddings.wedding.Marriage;
@@ -15,6 +15,7 @@ import pl.mcweddings.wedding.Reward;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,9 +30,11 @@ public class DataHandler {
     private String divorcePermission;
     private String marryStatusPermission;
     private String suffixPermission;
+    private String suffixColors;
     private String suffixSchema;
     private int maxDataIndex;
-    private int clearInterval;
+    private int requestCooldown;
+    private int suffixCooldown;
 
     public void loadConfig() {
         plugin.getPermissionManager().clearPermissions();
@@ -49,22 +52,41 @@ public class DataHandler {
         this.marryPermission = yml.getString("config.marryPermission");
         this.divorcePermission = yml.getString("config.divorcePermission");
         this.marryStatusPermission = yml.getString("config.marryStatusPermission");
-        this.suffixPermission = yml.getString("config.suffixColorPermission");
-        this.suffixSchema = getYAMLString(yml, "config.suffixSchema");
-        this.clearInterval = yml.getInt("config.clearInterval");
+        if(plugin.isLuckPermsAvailable()) {
+            this.suffixPermission = yml.getString("config.suffixColorPermission");
+            this.suffixSchema = yml.getString("config.suffixSchema");
+            this.suffixColors = yml.getString("config.suffixColors");
+            this.suffixCooldown = yml.getInt("config.suffixCooldown");
+        }
+        this.requestCooldown = yml.getInt("config.requestCooldown");
         PermissionManager pm = plugin.getPermissionManager();
         pm.registerPermission(managePermission, "Manage MCWeddings plugin");
         pm.registerPermission(marryPermission, "Permission to marry other player");
         pm.registerPermission(divorcePermission, "Permission to divorce with other player");
         pm.registerPermission(marryStatusPermission, "Permission which be added when player is married");
         pm.registerPermission(suffixPermission, "Permission to change suffix color");
-        runClearTask();
         loadMessages(yml);
-        ConfigurationSection section = yml.getConfigurationSection("config.cost.marry");
-        if(section != null) {
+        loadCost(yml);
+        loadRewards(yml);
+        loadData();
+    }
+
+    public void loadMessages(YamlConfiguration yml) {
+        Messages mess = plugin.getMessages();
+        ConfigurationSection section = yml.getConfigurationSection("messages");
+        for(String key : section.getKeys(false)) {
+            mess.getMessages().put(key, getYAMLString(yml, "messages." + key));
+        }
+    }
+
+    public void loadCost(YamlConfiguration yml) {
+        String[] types = {"marry", "divorce"};
+        for(String type : types) {
+            ConfigurationSection section = yml.getConfigurationSection("config.cost." + type);
+            if(section == null) continue;
             for(String key : section.getKeys(false)) {
                 Material m;
-                String path = "config.cost.marry." + key;
+                String path = "config.cost." + type + "." + key;
                 if(yml.getString(path + ".item") != null) {
                     m = Material.getMaterial(yml.getString(path + ".item"));
                     if(m == null) {
@@ -72,69 +94,6 @@ public class DataHandler {
                     }
                 } else {
                     continue;
-                }
-                ItemStack is = new ItemStack(m);
-                is.setAmount(yml.getInt(path + ".count"));
-                ItemMeta meta = is.getItemMeta();
-                String name = yml.getString(path + ".name");
-                if (name != null) {
-                    meta.setDisplayName(name.replace('&', '§'));
-                }
-                List<String> lore = yml.getStringList(path + ".lore");
-                List<String> newLore = new ArrayList<>();
-                for (String l : lore) {
-                    newLore.add(l.replace('&', '§'));
-                }
-                meta.setLore(newLore);
-                is.setItemMeta(meta);
-                marryCost.add(is);
-            }
-        }
-        section = yml.getConfigurationSection("config.cost.divorce");
-        if(section != null) {
-            for(String key : section.getKeys(false)) {
-                Material m;
-                String path = "config.cost.divorce." + key;
-                if(yml.getString(path + ".item") != null) {
-                    m = Material.getMaterial(yml.getString(path + ".item"));
-                    if(m == null) {
-                        continue;
-                    }
-                } else {
-                    continue;
-                }
-                ItemStack is = new ItemStack(m);
-                is.setAmount(yml.getInt(path + ".count"));
-                if(is.hasItemMeta()) {
-                    ItemMeta meta = is.getItemMeta();
-                    String name = yml.getString(path + ".name");
-                    if (name != null) {
-                        meta.setDisplayName(name.replace('&', '§'));
-                    }
-                    List<String> lore = yml.getStringList(path + ".lore");
-                    List<String> newLore = new ArrayList<>();
-                    for (String l : lore) {
-                        newLore.add(l.replace('&', '§'));
-                    }
-                    meta.setLore(newLore);
-                    is.setItemMeta(meta);
-                }
-                divorceCost.add(is);
-            }
-        }
-        section = yml.getConfigurationSection("config.rewards");
-        if(section != null) {
-            for(String key : section.getKeys(false)) {
-                String path = "config.rewards." + key;
-                int day = yml.getInt(path + ".requiredDays");
-                Material m = Material.AIR;
-                String item = yml.getString(path + ".item");
-                if(item != null) {
-                    m = Material.getMaterial(item);
-                    if(m == null) {
-                        m = Material.AIR;
-                        plugin.getLogger().warning("Cannot compare " + item + " with a correct material!");
-                    }
                 }
                 ItemStack is = new ItemStack(m);
                 is.setAmount(yml.getInt(path + ".count"));
@@ -148,49 +107,68 @@ public class DataHandler {
                 for(String l : lore) {
                     newLore.add(l.replace('&', '§'));
                 }
-                if (lore.size() > 0) meta.setLore(newLore);
-                meta.setUnbreakable(yml.getBoolean(path + ".unbreakable"));
-                List<String> givenEnch = yml.getStringList(path + ".enchantments");
-                for(String enchant : givenEnch) {
-                    String[] split = enchant.split(":");
-                    if(split.length != 2) continue;
-                    Enchantment enchantment = Enchantment.getByName(split[0]);
-                    if(enchantment == null) {
-                        plugin.getLogger().warning("Cannot compare " + split[0] + " with a correct enchantment!");
-                        continue;
-                    }
-                    int level;
-                    try {
-                        level = Integer.parseInt(split[1]);
-                    } catch(NumberFormatException e) {
-                        plugin.getLogger().warning("Cannot compare " + split[1] + " with a correct enchantment level!");
-                        continue;
-                    }
-                    meta.addEnchant(enchantment, level, true);
-                }
+                meta.setLore(newLore);
                 is.setItemMeta(meta);
-                Reward reward = new Reward(key, is, day, yml.getString(path + ".execute"));
-                plugin.getMarriageManager().getRewards().add(reward);
+                if(type.equals("marry")) {
+                    marryCost.add(is);
+                } else {
+                    divorceCost.add(is);
+                }
             }
         }
-        loadData();
     }
 
-    public void loadMessages(YamlConfiguration yml) {
-        Messages mess = plugin.getMessages();
-        mess.setPrefix(getYAMLString(yml, "messages.prefix"));
-        mess.setNoPermission(getYAMLString(yml, "messages.noPermission"));
-        mess.setMarryMessage(getYAMLString(yml, "messages.marryMessage"));
-        mess.setDivorceMessage(getYAMLString(yml, "messages.divorceMessage"));
-        mess.setMarriageInquiryMessage(getYAMLString(yml, "messages.marriageInquiryMessage"));
-        mess.setMarryRequestSentMessage(getYAMLString(yml, "messages.marryRequestSentMessage"));
-        mess.setCannotFoundPlayer(getYAMLString(yml, "messages.cannotFoundPlayer"));
-        mess.setMustBePlayer(getYAMLString(yml, "messages.mustBePlayer"));
-        mess.setMarryHimself(getYAMLString(yml, "messages.marryHimself"));
-        mess.setRequestAlreadySent(getYAMLString(yml, "messages.requestAlreadySent"));
-        mess.setRequestSent(getYAMLString(yml, "messages.requestSent"));
-        mess.setPlayerAlreadyMarried(getYAMLString(yml, "messages.playerAlreadyMarried"));
-        mess.setYouAreMarried(getYAMLString(yml, "messages.youAreMarried"));
+    public void loadRewards(YamlConfiguration yml) {
+        ConfigurationSection section = yml.getConfigurationSection("config.rewards");
+        if(section == null) return;
+        for(String key : section.getKeys(false)) {
+            String path = "config.rewards." + key;
+            int day = yml.getInt(path + ".requiredDays");
+            Material m = Material.AIR;
+            String item = yml.getString(path + ".item");
+            if(item != null) {
+                m = Material.getMaterial(item);
+                if(m == null) {
+                    m = Material.AIR;
+                    plugin.getLogger().warning("Cannot compare " + item + " with a correct material!");
+                }
+            }
+            ItemStack is = new ItemStack(m);
+            is.setAmount(yml.getInt(path + ".count"));
+            ItemMeta meta = is.getItemMeta();
+            String name = yml.getString(path + ".name");
+            if(name != null) {
+                meta.setDisplayName(name.replace('&', '§'));
+            }
+            List<String> lore = yml.getStringList(path + ".lore");
+            List<String> newLore = new ArrayList<>();
+            for(String l : lore) {
+                newLore.add(l.replace('&', '§'));
+            }
+            if (lore.size() > 0) meta.setLore(newLore);
+            meta.setUnbreakable(yml.getBoolean(path + ".unbreakable"));
+            List<String> givenEnch = yml.getStringList(path + ".enchantments");
+            for(String enchant : givenEnch) {
+                String[] split = enchant.split(":");
+                if(split.length != 2) continue;
+                Enchantment enchantment = Enchantment.getByName(split[0]);
+                if(enchantment == null) {
+                    plugin.getLogger().warning("Cannot compare " + split[0] + " with a correct enchantment!");
+                    continue;
+                }
+                int level;
+                try {
+                    level = Integer.parseInt(split[1]);
+                } catch(NumberFormatException e) {
+                    plugin.getLogger().warning("Cannot compare " + split[1] + " with a correct enchantment level!");
+                    continue;
+                }
+                meta.addEnchant(enchantment, level, true);
+            }
+            is.setItemMeta(meta);
+            Reward reward = new Reward(key, is, day, yml.getString(path + ".execute"));
+            plugin.getMarriageManager().getRewards().add(reward);
+        }
     }
 
     public void loadData() {
@@ -253,6 +231,18 @@ public class DataHandler {
         }
     }
 
+    public void updateSuffix(Marriage m, String newSuffix) {
+        File dataFile = getDataFile();
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(dataFile);
+        String path = "data." + m.getId() + ".suffix";
+        yml.set(path, newSuffix);
+        try {
+            yml.save(dataFile);
+        } catch(IOException e) {
+            plugin.getLogger().severe("Cannot save file data.yml (saving suffix change)!");
+        }
+    }
+
     public File getDataFile() {
         File dataFile = new File(plugin.getDataFolder(), "data.yml");
         if(!dataFile.exists()) {
@@ -263,14 +253,6 @@ public class DataHandler {
 
     public String getYAMLString(YamlConfiguration yml, String path) {
         return (yml.getString(path) != null) ? yml.getString(path).replace('&', '§') : "null";
-    }
-
-    private void runClearTask() {
-        if(plugin.getMarriageManager().getClearRequestsTask() != -1) return;
-        plugin.getMarriageManager().setClearRequestsTask(plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin,
-                () -> {
-                    plugin.getMarriageManager().getRequests().clear();
-                }, 0L, 20L * plugin.getDataHandler().getClearInterval()));
     }
 
 }

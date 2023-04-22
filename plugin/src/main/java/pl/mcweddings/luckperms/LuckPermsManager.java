@@ -40,4 +40,11 @@ public class LuckPermsManager {
         });
     }
 
+    public void updateSuffix(Player player, String oldSuffix, String newSuffix) {
+        luckPermsInstance.getUserManager().modifyUser(player.getUniqueId(), user -> {
+            user.data().remove(Node.builder(oldSuffix).build());
+            user.data().add(Node.builder(newSuffix).build());
+        });
+    }
+
 }
