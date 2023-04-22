@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.yaml.snakeyaml.Yaml;
 import pl.mcweddings.MCWeddings;
 import pl.mcweddings.permissions.PermissionManager;
 import pl.mcweddings.wedding.Marriage;
@@ -21,32 +22,19 @@ import java.util.List;
 public class DataHandler {
 
     private final MCWeddings plugin = MCWeddings.getInstance();
-    private String prefix;
+    private final List<ItemStack> marryCost = new ArrayList<>();
+    private final List<ItemStack> divorceCost = new ArrayList<>();
     private String managePermission;
     private String marryPermission;
     private String divorcePermission;
     private String marryStatusPermission;
     private String suffixPermission;
     private String suffixSchema;
-    private int clearInterval;
-    private String noPermission;
-    private String marryMessage;
-    private String divorceMessage;
-    private String marriageInquiryMessage;
-    private String marryRequestSentMessage;
-    private String cannotFoundPlayer;
-    private String mustBePlayer;
-    private String marryHimself;
-    private String requestAlreadySent;
-    private String requestSent;
-    private String playerAlreadyMarried;
-    private String youAreMarried;
-    private final List<ItemStack> marryCost = new ArrayList<>();
-    private final List<ItemStack> divorceCost = new ArrayList<>();
     private int maxDataIndex;
+    private int clearInterval;
 
     public void loadConfig() {
-        plugin.getPermissionManager().getPermissions().clear();
+        plugin.getPermissionManager().clearPermissions();
         plugin.getMarriageManager().getMarriages().clear();
         plugin.getMarriageManager().getRewards().clear();
         plugin.getMarriageManager().getTakenRewards().clear();
@@ -64,26 +52,14 @@ public class DataHandler {
         this.suffixPermission = yml.getString("config.suffixColorPermission");
         this.suffixSchema = getYAMLString(yml, "config.suffixSchema");
         this.clearInterval = yml.getInt("config.clearInterval");
-        runClearTask();
-        this.prefix = getYAMLString(yml, "messages.prefix");
-        this.noPermission = getYAMLString(yml, "messages.noPermission");
-        this.marryMessage = getYAMLString(yml, "messages.marryMessage");
-        this.divorceMessage = getYAMLString(yml, "messages.divorceMessage");
-        this.marriageInquiryMessage = getYAMLString(yml, "messages.marriageInquiryMessage");
-        this.marryRequestSentMessage = getYAMLString(yml, "messages.marryRequestSentMessage");
-        this.cannotFoundPlayer = getYAMLString(yml, "messages.cannotFoundPlayer");
-        this.mustBePlayer = getYAMLString(yml, "messages.mustBePlayer");
-        this.marryHimself = getYAMLString(yml, "messages.marryHimself");
-        this.requestAlreadySent = getYAMLString(yml, "messages.requestAlreadySent");
-        this.requestSent = getYAMLString(yml, "messages.requestSent");
-        this.playerAlreadyMarried = getYAMLString(yml, "messages.playerAlreadyMarried");
-        this.youAreMarried = getYAMLString(yml, "messages.youAreMarried");
         PermissionManager pm = plugin.getPermissionManager();
         pm.registerPermission(managePermission, "Manage MCWeddings plugin");
         pm.registerPermission(marryPermission, "Permission to marry other player");
         pm.registerPermission(divorcePermission, "Permission to divorce with other player");
         pm.registerPermission(marryStatusPermission, "Permission which be added when player is married");
         pm.registerPermission(suffixPermission, "Permission to change suffix color");
+        runClearTask();
+        loadMessages(yml);
         ConfigurationSection section = yml.getConfigurationSection("config.cost.marry");
         if(section != null) {
             for(String key : section.getKeys(false)) {
@@ -198,6 +174,23 @@ public class DataHandler {
             }
         }
         loadData();
+    }
+
+    public void loadMessages(YamlConfiguration yml) {
+        Messages mess = plugin.getMessages();
+        mess.setPrefix(getYAMLString(yml, "messages.prefix"));
+        mess.setNoPermission(getYAMLString(yml, "messages.noPermission"));
+        mess.setMarryMessage(getYAMLString(yml, "messages.marryMessage"));
+        mess.setDivorceMessage(getYAMLString(yml, "messages.divorceMessage"));
+        mess.setMarriageInquiryMessage(getYAMLString(yml, "messages.marriageInquiryMessage"));
+        mess.setMarryRequestSentMessage(getYAMLString(yml, "messages.marryRequestSentMessage"));
+        mess.setCannotFoundPlayer(getYAMLString(yml, "messages.cannotFoundPlayer"));
+        mess.setMustBePlayer(getYAMLString(yml, "messages.mustBePlayer"));
+        mess.setMarryHimself(getYAMLString(yml, "messages.marryHimself"));
+        mess.setRequestAlreadySent(getYAMLString(yml, "messages.requestAlreadySent"));
+        mess.setRequestSent(getYAMLString(yml, "messages.requestSent"));
+        mess.setPlayerAlreadyMarried(getYAMLString(yml, "messages.playerAlreadyMarried"));
+        mess.setYouAreMarried(getYAMLString(yml, "messages.youAreMarried"));
     }
 
     public void loadData() {

@@ -32,15 +32,15 @@ public class MarriageManager {
     private int clearRequestsTask = -1;
 
     public void createMarriage(String first, String second, CommandSender sender) {
-        String prefix = plugin.getDataHandler().getPrefix();
+        String prefix = plugin.getMessages().getPrefix();
         if(!checkMarriage(first, second, sender)) return;
         Player p = PlayerUtil.getPlayer(first);
         if(p == null) {
-            sender.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getCannotFoundPlayer(), first));
+            sender.sendMessage(MessageFormat.format(prefix + plugin.getMessages().getCannotFoundPlayer(), first));
             return;
         } else {
             if(!((Player) sender).canSee(p)) {
-                sender.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getCannotFoundPlayer(), first));
+                sender.sendMessage(MessageFormat.format(prefix + plugin.getMessages().getCannotFoundPlayer(), first));
                 return;
             }
         }
@@ -51,8 +51,9 @@ public class MarriageManager {
             return;
         }
         takeItems(p, slots, plugin.getDataHandler().getMarryCost());
-        plugin.getServer().broadcastMessage(prefix + MessageFormat.format(plugin.getDataHandler().getMarryMessage(), first, second));
-        Marriage marriage = new Marriage(0, first, second, DateManager.getDate("."), "d");
+        plugin.getServer().broadcastMessage(prefix + MessageFormat.format(plugin.getMessages().getMarryMessage(), first, second));
+        Marriage marriage = new Marriage(0, first, second, DateManager.getDate("."),
+                MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), "d"));
         marriage.setId(plugin.getDataHandler().createMarriage(marriage));
         Location p1loc = p.getLocation();
         p1loc.setY(p1loc.getY() + 2);
@@ -79,24 +80,22 @@ public class MarriageManager {
         }, 0L, 10L);
         if(plugin.isLuckPermsAvailable()) {
             plugin.getLuckPermsManager().addMarriagePermission(p);
-            plugin.getLuckPermsManager().addSuffix(p,
-                    MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), marriage.getSuffix()));
+            plugin.getLuckPermsManager().addSuffix(p,marriage.getSuffix());
             if(p2 != null) {
                 plugin.getLuckPermsManager().addMarriagePermission(p2);
-                plugin.getLuckPermsManager().addSuffix(p2,
-                        MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), marriage.getSuffix()));
+                plugin.getLuckPermsManager().addSuffix(p2, marriage.getSuffix());
             }
         }
     }
 
     public void sendRequest(String nickname, CommandSender sender) {
-        String prefix = plugin.getDataHandler().getPrefix();
+        String prefix = plugin.getMessages().getPrefix();
         if(!(sender instanceof Player)) {
-            sender.sendMessage(prefix + plugin.getDataHandler().getMustBePlayer());
+            sender.sendMessage(prefix + plugin.getMessages().getMustBePlayer());
             return;
         }
         /*if(nickname.equals(sender.getName())) {
-            sender.sendMessage(prefix + plugin.getDataHandler().getMarryHimself());
+            sender.sendMessage(prefix + plugin.getMessages().getMarryHimself());
             return;
         }*/
         if(!checkMarriage(sender.getName(), nickname, sender)) return;
@@ -106,16 +105,16 @@ public class MarriageManager {
             return;
         }
         if(hasRequest(nickname, sender.getName())) {
-            sender.sendMessage(prefix + plugin.getDataHandler().getRequestAlreadySent());
+            sender.sendMessage(prefix + plugin.getMessages().getRequestAlreadySent());
             return;
         }
         Player p = PlayerUtil.getPlayer(nickname);
         if(p == null) {
-            sender.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getCannotFoundPlayer(), nickname));
+            sender.sendMessage(MessageFormat.format(prefix + plugin.getMessages().getCannotFoundPlayer(), nickname));
             return;
         } else {
             if(!((Player) sender).canSee(p)) {
-                sender.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getCannotFoundPlayer(), nickname));
+                sender.sendMessage(MessageFormat.format(prefix + plugin.getMessages().getCannotFoundPlayer(), nickname));
                 return;
             }
         }
@@ -124,14 +123,14 @@ public class MarriageManager {
             return;
         }
         createRequest(sender.getName(), nickname);
-        sender.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getRequestSent(), nickname));
-        p.sendMessage(MessageFormat.format(prefix + plugin.getDataHandler().getMarriageInquiryMessage(), sender.getName()));
+        sender.sendMessage(MessageFormat.format(prefix + plugin.getMessages().getRequestSent(), nickname));
+        p.sendMessage(MessageFormat.format(prefix + plugin.getMessages().getMarriageInquiryMessage(), sender.getName()));
     }
 
     public void divorce(CommandSender sender) {
-        String prefix = plugin.getDataHandler().getPrefix();
+        String prefix = plugin.getMessages().getPrefix();
         if(!(sender instanceof Player)) {
-            sender.sendMessage(prefix + plugin.getDataHandler().getMustBePlayer());
+            sender.sendMessage(prefix + plugin.getMessages().getMustBePlayer());
             return;
         }
         if(!isPlayerMarried(sender.getName())) {
@@ -147,7 +146,7 @@ public class MarriageManager {
         Marriage m = getPlayerMarriage(sender.getName());
         String secondPlayer = (m.getFirst().equals(sender.getName()) ? m.getSecond() : m.getFirst());
         sender.sendMessage(MessageFormat.format(prefix + "§aYou successfully divorced with {0}!", secondPlayer));
-        plugin.getServer().broadcastMessage(MessageFormat.format(prefix + plugin.getDataHandler().getDivorceMessage(), sender.getName(), secondPlayer));
+        plugin.getServer().broadcastMessage(MessageFormat.format(prefix + plugin.getMessages().getDivorceMessage(), sender.getName(), secondPlayer));
         for(Player player : plugin.getServer().getOnlinePlayers()) {
             player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 1.0F, 3.0F);
         }
@@ -157,21 +156,19 @@ public class MarriageManager {
         marriages.remove(m);
         if(plugin.isLuckPermsAvailable()) {
             plugin.getLuckPermsManager().removeMarriagePermission((Player) sender);
-            plugin.getLuckPermsManager().removeSuffix((Player) sender,
-                    MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), m.getSuffix()));
+            plugin.getLuckPermsManager().removeSuffix((Player) sender, m.getSuffix());
             Player p2 = PlayerUtil.getPlayer(secondPlayer);
             if(p2 != null) {
                 plugin.getLuckPermsManager().removeMarriagePermission(p2);
-                plugin.getLuckPermsManager().removeSuffix(p2,
-                        MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), m.getSuffix()));
+                plugin.getLuckPermsManager().removeSuffix(p2, m.getSuffix());
             }
         }
     }
 
     public void getReward(CommandSender sender, String id) {
-        String prefix = plugin.getDataHandler().getPrefix();
+        String prefix = plugin.getMessages().getPrefix();
         if(!(sender instanceof Player)) {
-            sender.sendMessage(prefix + plugin.getDataHandler().getMustBePlayer());
+            sender.sendMessage(prefix + plugin.getMessages().getMustBePlayer());
             return;
         }
         Marriage m = getPlayerMarriage(sender.getName());
@@ -242,8 +239,8 @@ public class MarriageManager {
         return playerRequests.contains(from);
     }
 
-    public void clearRequests(String who) {
-        requests.remove(who);
+    public void clearRequests(String receiver) {
+        requests.remove(receiver);
     }
 
     public void createRequest(String from, String to) {
@@ -257,13 +254,13 @@ public class MarriageManager {
     }
 
     public boolean checkMarriage(String first, String second, CommandSender sender) {
-        String prefix = plugin.getDataHandler().getPrefix();
+        String prefix = plugin.getMessages().getPrefix();
         if(isPlayerMarried(first)) {
-            sender.sendMessage(prefix + plugin.getDataHandler().getYouAreMarried());
+            sender.sendMessage(prefix + plugin.getMessages().getYouAreMarried());
             return false;
         }
         if(isPlayerMarried(second)) {
-            sender.sendMessage(prefix + plugin.getDataHandler().getPlayerAlreadyMarried());
+            sender.sendMessage(prefix + plugin.getMessages().getPlayerAlreadyMarried());
             return false;
         }
 

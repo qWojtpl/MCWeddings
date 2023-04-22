@@ -26,4 +26,11 @@ public class PermissionManager {
         return permissions.getOrDefault(permission, null);
     }
 
+    public void clearPermissions() {
+        for(String key : permissions.keySet()) {
+            plugin.getServer().getPluginManager().removePermission(permissions.get(key));
+        }
+        permissions.clear();
+    }
+
 }

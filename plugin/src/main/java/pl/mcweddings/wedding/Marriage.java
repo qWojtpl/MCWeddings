@@ -12,6 +12,7 @@ public class Marriage {
     private final String first;
     private final String second;
     private final String date;
+    @Setter
     private String suffix;
 
     public Marriage(int id, String first, String second, String date, String suffix) {
@@ -21,10 +22,6 @@ public class Marriage {
         this.date = date;
         this.suffix = suffix;
         MCWeddings.getInstance().getMarriageManager().getMarriages().add(this);
-    }
-
-    public void setSuffix(String newSuffix) {
-        suffix = newSuffix;
     }
 
 }

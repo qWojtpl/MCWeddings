@@ -9,14 +9,15 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
-import org.checkerframework.checker.units.qual.A;
 import pl.mcweddings.MCWeddings;
 import pl.mcweddings.data.DataHandler;
+import pl.mcweddings.data.Messages;
 import pl.mcweddings.permissions.PermissionManager;
 import pl.mcweddings.util.DateManager;
 import pl.mcweddings.wedding.Marriage;
 import pl.mcweddings.wedding.Reward;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class Commands implements CommandExecutor {
 
     private final MCWeddings plugin = MCWeddings.getInstance();
     private final DataHandler dataHandler = plugin.getDataHandler();
+    private final Messages messages = plugin.getMessages();
     private final PermissionManager permissionManager = plugin.getPermissionManager();
 
     @Override
@@ -31,21 +33,21 @@ public class Commands implements CommandExecutor {
         boolean marry = false;
         if(label.equalsIgnoreCase("marry") || label.equalsIgnoreCase("slub")) {
             if(!sender.hasPermission(permissionManager.getPermission(dataHandler.getMarryPermission()))) {
-                sender.sendMessage(dataHandler.getPrefix() + dataHandler.getNoPermission());
+                sender.sendMessage(messages.getPrefix() + messages.getNoPermission());
                 return true;
             }
             marry = true;
         } else {
             if(!sender.hasPermission(permissionManager.getPermission(dataHandler.getDivorcePermission()))) {
-                sender.sendMessage(dataHandler.getPrefix() + dataHandler.getNoPermission());
+                sender.sendMessage(messages.getPrefix() + messages.getNoPermission());
                 return true;
             }
         }
         if(args.length > 0) {
             if(sender.hasPermission(permissionManager.getPermission(dataHandler.getManagePermission()))) {
                 if(args[0].equalsIgnoreCase("reload")) {
-                    plugin.getDataHandler().loadConfig();
-                    sender.sendMessage(dataHandler.getPrefix() + "§aReloaded!");
+                    dataHandler.loadConfig();
+                    sender.sendMessage(messages.getPrefix() + "§aReloaded!");
                     return true;
                 }
             }
@@ -65,6 +67,8 @@ public class Commands implements CommandExecutor {
                         }
                     } else if(args[0].equalsIgnoreCase("status")) {
                         showStatus(sender);
+                    } else if(args[0].equalsIgnoreCase("color")) {
+
                     } else {
                         plugin.getMarriageManager().sendRequest(args[0], sender);
                     }
@@ -89,6 +93,7 @@ public class Commands implements CommandExecutor {
         sender.sendMessage("§d/marry requirements §4- §cRequirements for getting married");
         sender.sendMessage("§d/marry rewards §4- §cRewards for being married");
         sender.sendMessage("§d/marry status §4- §cStatus of your marriage");
+        sender.sendMessage("§d/marry color §4- §cSet suffix color");
         sender.sendMessage("§d/divorce §4- §cDivorce with player");
         sender.sendMessage("§d/divorce requirements §4- §cRequirements for getting divorced");
         if(sender.hasPermission(permissionManager.getPermission(dataHandler.getManagePermission()))) {
@@ -102,7 +107,7 @@ public class Commands implements CommandExecutor {
     public void showRewards(CommandSender sender) {
         Marriage playerMarriage = plugin.getMarriageManager().getPlayerMarriage(sender.getName());
         if(playerMarriage == null) {
-            sender.sendMessage(plugin.getDataHandler().getPrefix() + "§cYou're not married");
+            sender.sendMessage(messages.getPrefix() + "§cYou're not married");
             return;
         }
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
@@ -133,7 +138,7 @@ public class Commands implements CommandExecutor {
     public void showStatus(CommandSender sender) {
         Marriage m = plugin.getMarriageManager().getPlayerMarriage(sender.getName());
         if(m == null) {
-            sender.sendMessage(plugin.getDataHandler().getPrefix() + "§cYou're not married");
+            sender.sendMessage(messages.getPrefix() + "§cYou're not married");
             return;
         }
         String first = m.getFirst();
@@ -144,6 +149,10 @@ public class Commands implements CommandExecutor {
         sender.sendMessage("§dMarriage date: §c" + m.getDate());
         sender.sendMessage("§dMarriage length: §c" +
                 DateManager.calculateDays(m.getDate(), DateManager.getDate(".")) + " days");
+        if(plugin.isLuckPermsAvailable()) {
+            sender.sendMessage("§dSuffix: " +
+                    MessageFormat.format(dataHandler.getSuffixSchema(), m.getSuffix()));
+        }
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
     }
@@ -152,7 +161,7 @@ public class Commands implements CommandExecutor {
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
         sender.sendMessage(" ");
         sender.sendMessage("§dMarriage requirements:");
-        for(ItemStack is : plugin.getDataHandler().getMarryCost()) {
+        for(ItemStack is : dataHandler.getMarryCost()) {
             String name = "";
             if(!is.getItemMeta().getDisplayName().equals("")) {
                 name = is.getItemMeta().getDisplayName() + " ";
@@ -168,7 +177,7 @@ public class Commands implements CommandExecutor {
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
         sender.sendMessage(" ");
         sender.sendMessage("§dDivorce requirements:");
-        for(ItemStack is : plugin.getDataHandler().getDivorceCost()) {
+        for(ItemStack is : dataHandler.getDivorceCost()) {
             String name = "";
             if(!is.getItemMeta().getDisplayName().equals("")) {
                 name = is.getItemMeta().getDisplayName() + " ";

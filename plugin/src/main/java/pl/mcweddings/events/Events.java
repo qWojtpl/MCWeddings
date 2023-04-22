@@ -23,8 +23,7 @@ public class Events implements Listener {
             if(m == null) {
                 plugin.getLuckPermsManager().removeMarriagePermission(p);
             } else {
-                plugin.getLuckPermsManager().addSuffix(p,
-                        MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), m.getSuffix()));
+                plugin.getLuckPermsManager().addSuffix(p, m.getSuffix());
             }
         }
     }
@@ -35,8 +34,7 @@ public class Events implements Listener {
         Player p = event.getPlayer();
         Marriage m = plugin.getMarriageManager().getPlayerMarriage(p.getName());
         if(m != null) {
-            plugin.getLuckPermsManager().removeSuffix(p,
-                    MessageFormat.format(plugin.getDataHandler().getSuffixSchema(), m.getSuffix()));
+            plugin.getLuckPermsManager().removeSuffix(p, m.getSuffix());
         }
     }
 

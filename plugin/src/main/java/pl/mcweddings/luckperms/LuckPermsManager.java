@@ -30,13 +30,13 @@ public class LuckPermsManager {
 
     public void addSuffix(Player player, String suffix) {
         luckPermsInstance.getUserManager().modifyUser(player.getUniqueId(), user -> {
-            user.data().add(Node.builder("suffix.150." + suffix).build());
+            user.data().add(Node.builder(suffix).build());
         });
     }
 
     public void removeSuffix(Player player, String suffix) {
         luckPermsInstance.getUserManager().modifyUser(player.getUniqueId(), user -> {
-            user.data().remove(Node.builder("suffix.150." + suffix).build());
+            user.data().remove(Node.builder(suffix).build());
         });
     }
 

@@ -5,6 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import pl.mcweddings.commands.CommandHelper;
 import pl.mcweddings.commands.Commands;
 import pl.mcweddings.data.DataHandler;
+import pl.mcweddings.data.Messages;
 import pl.mcweddings.events.Events;
 import pl.mcweddings.luckperms.LuckPermsManager;
 import pl.mcweddings.permissions.PermissionManager;
@@ -15,6 +16,7 @@ public final class MCWeddings extends JavaPlugin {
 
     private static MCWeddings main;
     private DataHandler dataHandler;
+    private Messages messages;
     private PermissionManager permissionManager;
     private MarriageManager marriageManager;
     private LuckPermsManager luckPermsManager;
@@ -33,6 +35,7 @@ public final class MCWeddings extends JavaPlugin {
         } else {
             getLogger().info("LuckPerms not found! Remember - you can use LuckPerms to manage suffixes!");
         }
+        this.messages = new Messages();
         this.permissionManager = new PermissionManager();
         this.marriageManager = new MarriageManager();
         this.dataHandler = new DataHandler();

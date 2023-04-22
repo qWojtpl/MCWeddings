@@ -12,7 +12,7 @@ config:
 
   divorcePermission: "mcweddings.divorce"
 
-  # Player will get this permission if is married
+  # Player will have this permission when is married
   # REQUIRES LUCKPERMS
 
   marryStatusPermission: "mcweddings.ismarried"
