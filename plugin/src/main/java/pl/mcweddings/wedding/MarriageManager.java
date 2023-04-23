@@ -361,16 +361,7 @@ public class MarriageManager {
             int totalAmount = 0;
             for(int i = 0; i < 36; i++) {
                 ItemStack inventoryItem = player.getInventory().getItem(i);
-                if(inventoryItem == null) continue;
-                if(!inventoryItem.getType().equals(is.getType())) continue;
-                if(!inventoryItem.getItemMeta().getDisplayName().equals(is.getItemMeta().getDisplayName())) continue;
-                if(inventoryItem.getItemMeta().getLore() == null && is.getItemMeta().getLore() != null) continue;
-                if(inventoryItem.getItemMeta().getLore() != null && is.getItemMeta().getLore() == null) continue;
-                if(inventoryItem.getItemMeta().getLore() != null) {
-                    if(is.getItemMeta().getLore() != null) {
-                        if(!inventoryItem.getItemMeta().getLore().equals(is.getItemMeta().getLore())) continue;
-                    }
-                }
+                if(!isSimilar(inventoryItem, is)) continue;
                 totalAmount += inventoryItem.getAmount();
                 slots.add(i);
             }
@@ -386,16 +377,7 @@ public class MarriageManager {
             int required = is.getAmount();
             for(int slot : checkSlots) {
                 ItemStack inventoryItem = player.getInventory().getItem(slot);
-                if(inventoryItem == null) continue;
-                if(!inventoryItem.getType().equals(is.getType())) continue;
-                if(!inventoryItem.getItemMeta().getDisplayName().equals(is.getItemMeta().getDisplayName())) continue;
-                if(inventoryItem.getItemMeta().getLore() == null && is.getItemMeta().getLore() != null) continue;
-                if(inventoryItem.getItemMeta().getLore() != null && is.getItemMeta().getLore() == null) continue;
-                if(inventoryItem.getItemMeta().getLore() != null) {
-                    if(is.getItemMeta().getLore() != null) {
-                        if(!inventoryItem.getItemMeta().getLore().equals(is.getItemMeta().getLore())) continue;
-                    }
-                }
+                if(!isSimilar(inventoryItem, is)) continue;
                 required -= inventoryItem.getAmount();
                 if(required > 0) {
                     inventoryItem.setAmount(0);
@@ -406,6 +388,21 @@ public class MarriageManager {
             }
         }
         player.updateInventory();
+    }
+
+    public boolean isSimilar(ItemStack inventoryItem, ItemStack is) {
+        if(inventoryItem == null || is == null) return false;
+        if(!inventoryItem.getType().equals(is.getType())) return false;
+        if(!inventoryItem.getItemMeta().getDisplayName().equals(is.getItemMeta().getDisplayName())) return false;
+        if(inventoryItem.getItemMeta().getLore() == null && is.getItemMeta().getLore() != null) return false;
+        if(inventoryItem.getItemMeta().getLore() != null && is.getItemMeta().getLore() == null) return false;
+        if(inventoryItem.getItemMeta().getLore() != null) {
+            if(is.getItemMeta().getLore() != null) {
+                if(!inventoryItem.getItemMeta().getLore().equals(is.getItemMeta().getLore())) return false;
+            }
+        }
+        if(!inventoryItem.getItemMeta().getEnchants().equals(is.getEnchantments())) return false;
+        return true;
     }
 
 }

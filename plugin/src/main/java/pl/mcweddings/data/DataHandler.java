@@ -13,6 +13,7 @@ import pl.mcweddings.permissions.PermissionManager;
 import pl.mcweddings.wedding.Marriage;
 import pl.mcweddings.wedding.Reward;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -93,31 +94,9 @@ public class DataHandler {
             ConfigurationSection section = yml.getConfigurationSection("config.cost." + type);
             if(section == null) continue;
             for(String key : section.getKeys(false)) {
-                Material m;
                 String path = "config.cost." + type + "." + key;
-                if(yml.getString(path + ".item") != null) {
-                    m = Material.getMaterial(yml.getString(path + ".item"));
-                    if(m == null) {
-                        continue;
-                    }
-                } else {
-                    continue;
-                }
-                ItemStack is = new ItemStack(m);
-                is.setAmount(yml.getInt(path + ".count"));
-                ItemMeta meta = is.getItemMeta();
-                if(meta == null) continue;
-                String name = yml.getString(path + ".name");
-                if(name != null) {
-                    meta.setDisplayName(name.replace('&', '§'));
-                }
-                List<String> lore = yml.getStringList(path + ".lore");
-                List<String> newLore = new ArrayList<>();
-                for(String l : lore) {
-                    newLore.add(l.replace('&', '§'));
-                }
-                meta.setLore(newLore);
-                is.setItemMeta(meta);
+                ItemStack is = getItemStack(path, yml);
+                if(is == null) continue;
                 if(type.equals("marry")) {
                     marryCost.add(is);
                 } else {
@@ -133,49 +112,7 @@ public class DataHandler {
         for(String key : section.getKeys(false)) {
             String path = "config.rewards." + key;
             int day = yml.getInt(path + ".requiredDays");
-            Material m = Material.DIRT;
-            String item = yml.getString(path + ".item");
-            if(item != null) {
-                m = Material.getMaterial(item);
-                if(m == null) {
-                    m = Material.DIRT;
-                    plugin.getLogger().warning("Cannot compare " + item + " with a correct material!");
-                }
-            }
-            ItemStack is = new ItemStack(m);
-            is.setAmount(yml.getInt(path + ".count"));
-            ItemMeta meta = is.getItemMeta();
-            if(meta == null) continue;
-            String name = yml.getString(path + ".name");
-            if(name != null) {
-                meta.setDisplayName(name.replace('&', '§'));
-            }
-            List<String> lore = yml.getStringList(path + ".lore");
-            List<String> newLore = new ArrayList<>();
-            for(String l : lore) {
-                newLore.add(l.replace('&', '§'));
-            }
-            if (lore.size() > 0) meta.setLore(newLore);
-            meta.setUnbreakable(yml.getBoolean(path + ".unbreakable"));
-            List<String> givenEnch = yml.getStringList(path + ".enchantments");
-            for(String enchant : givenEnch) {
-                String[] split = enchant.split(":");
-                if(split.length != 2) continue;
-                Enchantment enchantment = Enchantment.getByName(split[0]);
-                if(enchantment == null) {
-                    plugin.getLogger().warning("Cannot compare " + split[0] + " with a correct enchantment!");
-                    continue;
-                }
-                int level;
-                try {
-                    level = Integer.parseInt(split[1]);
-                } catch(NumberFormatException e) {
-                    plugin.getLogger().warning("Cannot compare " + split[1] + " with a correct enchantment level!");
-                    continue;
-                }
-                meta.addEnchant(enchantment, level, true);
-            }
-            is.setItemMeta(meta);
+            ItemStack is = getItemStack(path, yml);
             Reward reward = new Reward(key, is, day, yml.getString(path + ".execute"));
             plugin.getMarriageManager().getRewards().add(reward);
         }
@@ -263,6 +200,54 @@ public class DataHandler {
 
     public String getYAMLString(YamlConfiguration yml, String path) {
         return (yml.getString(path) != null) ? yml.getString(path).replace('&', '§') : "null";
+    }
+
+    @Nullable
+    public ItemStack getItemStack(String path, YamlConfiguration yml) {
+        Material m;
+        if(yml.getString(path + ".item") != null) {
+            m = Material.getMaterial(yml.getString(path + ".item"));
+            if(m == null) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+        ItemStack is = new ItemStack(m);
+        is.setAmount(yml.getInt(path + ".count"));
+        ItemMeta meta = is.getItemMeta();
+        if(meta == null) return null;
+        String name = yml.getString(path + ".name");
+        if(name != null) {
+            meta.setDisplayName(name.replace('&', '§'));
+        }
+        List<String> lore = yml.getStringList(path + ".lore");
+        List<String> newLore = new ArrayList<>();
+        for(String l : lore) {
+            newLore.add(l.replace('&', '§'));
+        }
+        meta.setLore(newLore);
+        meta.setUnbreakable(yml.getBoolean(path + ".unbreakable"));
+        List<String> givenEnch = yml.getStringList(path + ".enchantments");
+        for(String enchant : givenEnch) {
+            String[] split = enchant.split(":");
+            if(split.length != 2) continue;
+            Enchantment enchantment = Enchantment.getByName(split[0]);
+            if(enchantment == null) {
+                plugin.getLogger().warning("Cannot compare " + split[0] + " with a correct enchantment!");
+                continue;
+            }
+            int level;
+            try {
+                level = Integer.parseInt(split[1]);
+            } catch(NumberFormatException e) {
+                plugin.getLogger().warning("Cannot compare " + split[1] + " with a correct enchantment level!");
+                continue;
+            }
+            meta.addEnchant(enchantment, level, true);
+        }
+        is.setItemMeta(meta);
+        return is;
     }
 
 }
