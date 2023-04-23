@@ -3,7 +3,6 @@ package pl.mcweddings.wedding;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
@@ -14,6 +13,7 @@ import pl.mcweddings.data.Messages;
 import pl.mcweddings.util.DateManager;
 import pl.mcweddings.util.PlayerUtil;
 
+import javax.annotation.Nullable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +45,7 @@ public class MarriageManager {
      */
     public void createMarriage(String first, String second, CommandSender sender) {
         String prefix = messages.getMessage("prefix");
-        if(!checkMarriage(first, second, sender)) return;
+        if(!checkMarriage(sender, second)) return;
         Player p = PlayerUtil.getPlayer(first);
         if(p == null) {
             sender.sendMessage(MessageFormat.format(prefix + messages.getMessage("cannotFoundPlayer"), first));
@@ -106,6 +106,13 @@ public class MarriageManager {
         createColorCooldown(p2.getName());
     }
 
+    /**
+     * Sending marriage request to player. If there's already request
+     * from that player, then marriage is being created.
+     *
+     * @param   nickname    To which player we're sending marry request
+     * @param   sender      Request sender
+     */
     public void sendRequest(String nickname, CommandSender sender) {
         String prefix = messages.getMessage("prefix");
         if(!(sender instanceof Player)) {
@@ -116,7 +123,7 @@ public class MarriageManager {
             sender.sendMessage(prefix + messages.getMessage("marryHimself"));
             return;
         }
-        if(!checkMarriage(sender.getName(), nickname, sender)) return;
+        if(!checkMarriage(sender, nickname)) return;
         if(hasRequest(sender.getName(), nickname)) {
             clearRequests(sender.getName());
             createMarriage(nickname, sender.getName(), sender);
@@ -145,6 +152,12 @@ public class MarriageManager {
         p.sendMessage(MessageFormat.format(prefix + messages.getMessage("marriageInquiryMessage"), sender.getName()));
     }
 
+    /**
+     * If player has required items and is married,
+     * then marriage is being deleted.
+     *
+     * @param   sender  Divorce request sender
+     */
     public void divorce(CommandSender sender) {
         String prefix = messages.getMessage("prefix");
         if(!(sender instanceof Player)) {
@@ -183,6 +196,15 @@ public class MarriageManager {
         }
     }
 
+    /**
+     * Plugin is trying to change suffix for sender's
+     * marriage. If new suffix is the same as already suffix,
+     * then error will appear. This feature requires LuckPerms.
+     * Available suffix colors can be set in config.
+     *
+     * @param   sender  Change suffix request sender
+     * @param   color   New suffix color
+     */
     public void changeSuffix(CommandSender sender, String color) {
         String prefix = messages.getMessage("prefix");
         if(!plugin.isLuckPermsAvailable()) {
@@ -240,6 +262,15 @@ public class MarriageManager {
         sender.sendMessage(prefix + messages.getMessage("changedSuffix"));
     }
 
+    /**
+     * Checks if player is married and if this player can
+     * receive reward with that ID (marriage has required
+     * days etc.). If player don't have space in their
+     * inventory, then items will be dropped.
+     *
+     * @param   sender  Player which want to receive reward
+     * @param   id      Reward ID
+     */
     public void getReward(CommandSender sender, String id) {
         String prefix = messages.getMessage("prefix");
         if(!(sender instanceof Player)) {
@@ -291,6 +322,12 @@ public class MarriageManager {
         plugin.getCommands().showRewards(sender);
     }
 
+    /**
+     * Returns true if player with that nickname is married.
+     *
+     * @param   nickname  Player which you want to check
+     * @return True or false
+     */
     public boolean isPlayerMarried(String nickname) {
         for(Marriage m : marriages) {
             if(m.getFirst().equals(nickname) || m.getSecond().equals(nickname)) {
@@ -300,6 +337,13 @@ public class MarriageManager {
         return false;
     }
 
+    /**
+     * Returns player's marriage if available
+     *
+     * @param   nickname  Player which you want to check
+     * @return Player's marriage or null
+     */
+    @Nullable
     public Marriage getPlayerMarriage(String nickname) {
         for(Marriage m : marriages) {
             if(m.getFirst().equals(nickname) || m.getSecond().equals(nickname)) {
@@ -309,15 +353,34 @@ public class MarriageManager {
         return null;
     }
 
+    /**
+     * Returns true if player has marriage request
+     * from second player.
+     *
+     * @param   who     Request receiver
+     * @param   from    Request sender
+     * @return True or false
+     */
     public boolean hasRequest(String who, String from) {
         List<String> playerRequests = requests.getOrDefault(who, new ArrayList<>());
         return playerRequests.contains(from);
     }
 
+    /**
+     * Clears all receiver's marriage requests.
+     *
+     * @param   receiver     Request receiver
+     */
     public void clearRequests(String receiver) {
         requests.remove(receiver);
     }
 
+    /**
+     * Create marriage request.
+     *
+     * @param   from    Request sender
+     * @param   to      Request receiver
+     */
     public void createRequest(String from, String to) {
         List<String> playerRequests = requests.getOrDefault(to, new ArrayList<>());
         playerRequests.add(from);
@@ -333,6 +396,11 @@ public class MarriageManager {
         }, 20L * plugin.getDataHandler().getRequestCooldown());
     }
 
+    /**
+     * Creates cooldown for changing suffix for player.
+     *
+     * @param   nickname    Player nickname
+     */
     public void createColorCooldown(String nickname) {
         colorChanges.add(nickname);
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
@@ -340,9 +408,17 @@ public class MarriageManager {
         }, 20L * plugin.getDataHandler().getSuffixCooldown());
     }
 
-    public boolean checkMarriage(String first, String second, CommandSender sender) {
+    /**
+     * Checks if sender or second player
+     * is married. Sends message to sender.
+     *
+     * @param   sender  Command sender (first player)
+     * @param   second  Second player
+     * @return True or false
+     */
+    public boolean checkMarriage(CommandSender sender, String second) {
         String prefix = messages.getMessage("prefix");
-        if(isPlayerMarried(first)) {
+        if(isPlayerMarried(sender.getName())) {
             sender.sendMessage(prefix + messages.getMessage("youAreMarried"));
             return false;
         }
@@ -354,6 +430,15 @@ public class MarriageManager {
         return true;
     }
 
+    /**
+     * Get slots where items from list are.
+     * If there's no all items in player inventory,
+     * then it will return empty integer list.
+     *
+     * @param   player  Player to check
+     * @param   items   List of items
+     * @return Empty integer list or list filled with slots
+     */
     public List<Integer> getItemSlots(Player player, List<ItemStack> items) {
         List<Integer> slots = new ArrayList<>();
         int goodItems = 0;
@@ -372,6 +457,14 @@ public class MarriageManager {
         return slots;
     }
 
+    /**
+     * Takes items from list from player inventory.
+     * You must define which slots must be checked.
+     *
+     * @param   player      Player
+     * @param   checkSlots  Slots to check
+     * @param   items       List of items
+     */
     public void takeItems(Player player, List<Integer> checkSlots, List<ItemStack> items) {
         for(ItemStack is : items) {
             int required = is.getAmount();
@@ -390,6 +483,14 @@ public class MarriageManager {
         player.updateInventory();
     }
 
+    /**
+     * Checks if inventory item and itemstack
+     * are similar (name, lore, enchantments, unbreakable)
+     *
+     * @param   inventoryItem   Inventory itemstack
+     * @param   is              Itemstack to check
+     * @return True or false
+     */
     public boolean isSimilar(ItemStack inventoryItem, ItemStack is) {
         if(inventoryItem == null || is == null) return false;
         if(!inventoryItem.getType().equals(is.getType())) return false;
@@ -402,6 +503,7 @@ public class MarriageManager {
             }
         }
         if(!inventoryItem.getItemMeta().getEnchants().equals(is.getEnchantments())) return false;
+        if(inventoryItem.getItemMeta().isUnbreakable() != is.getItemMeta().isUnbreakable()) return false;
         return true;
     }
 
