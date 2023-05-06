@@ -184,3 +184,4 @@ messages:
   help-divorce: "&d/divorce &4- &cDivorce with player"
   help-dRequirements: "&d/divorce requirements &4- &cRequirements for getting divorced"
   help-reload: "&d/marry reload &4- &cReload configuration and data"
+  help-force: "&d/marry force <divorce|marry> <player> [player (for force marry)] &4- &cForce marriage/divorce"

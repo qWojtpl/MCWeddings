@@ -7,6 +7,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import pl.mcweddings.MCWeddings;
 import pl.mcweddings.data.DataHandler;
@@ -51,6 +52,27 @@ public class Commands implements CommandExecutor {
                     dataHandler.loadConfig();
                     sender.sendMessage(messages.getMessage("prefix") + "§aReloaded!");
                     return true;
+                } else if(args[0].equalsIgnoreCase("force")) {
+                    if(!(sender instanceof Player)) {
+                        sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("mustBePlayer"));
+                        return true;
+                    }
+                    if(args.length > 1) {
+                        if(args[1].equalsIgnoreCase("marry")) {
+                            if(args.length > 3) {
+                                plugin.getMarriageManager().forceMarriage((Player) sender, args[2], args[3]);
+                                return true;
+                            }
+                        } else if(args[1].equalsIgnoreCase("divorce")) {
+                            if(args.length > 2) {
+                                plugin.getMarriageManager().forceDivorce((Player) sender, args[2]);
+                                return true;
+                            }
+                        }
+                    }
+                    sender.sendMessage(MessageFormat.format(messages.getMessage("correctUsage"),
+                            "/" + label + " " + args[0] + "<divorce|marry> <player> [player (for force marry)]"));
+                    return true;
                 }
             }
             if(args[0].equalsIgnoreCase(dataHandler.getRequirementsAlias())) {
@@ -79,10 +101,14 @@ public class Commands implements CommandExecutor {
                         } else {
                             sender.sendMessage(messages.getMessage("prefix") +
                                     MessageFormat.format(messages.getMessage("correctUsage"),
-                                            "/marry color <" + args[1] + ":" + dataHandler.getSuffixColors() + ">"));
+                                            "/" + label + " " + args[0] + " <" + args[0] + ":" + dataHandler.getSuffixColors() + ">"));
                         }
                     } else {
-                        plugin.getMarriageManager().sendRequest(args[0], sender);
+                        if(!(sender instanceof Player)) {
+                            sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("mustBePlayer"));
+                            return true;
+                        }
+                        plugin.getMarriageManager().sendRequest(args[0], (Player) sender);
                     }
                 } else {
                     showHelp(sender);
@@ -92,7 +118,11 @@ public class Commands implements CommandExecutor {
             if(marry) {
                 showHelp(sender);
             } else {
-                plugin.getMarriageManager().divorce(sender);
+                if(!(sender instanceof Player)) {
+                    sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("mustBePlayer"));
+                    return true;
+                }
+                plugin.getMarriageManager().divorce((Player) sender, false);
             }
         }
         return true;
@@ -113,6 +143,7 @@ public class Commands implements CommandExecutor {
         if(sender.hasPermission(permissionManager.getPermission(dataHandler.getManagePermission()))) {
             sender.sendMessage("§4----------------------------------");
             sender.sendMessage(messages.getMessage("help-reload"));
+            sender.sendMessage(messages.getMessage("help-force"));
         }
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");
