@@ -31,6 +31,9 @@ config:
   # In seconds. After this seconds player can send marry requests again to player
   requestCooldown: 120
 
+  # Max distance between two players who want to marry.
+  maxDistance: 32
+
   # Cost for marry/divorce. Can be any item.
   cost:
     marry:
@@ -161,6 +164,9 @@ messages:
   # Message when reward is already received
   rewardReceived: "&cYou've already received this reward!"
 
+  # Message when player is too far away from another player
+  tooFarAway: "&cYou're too far away from the second player!"
+
   # Simple words section
   marriageDate: "&dMarriage date: &c{0}"
   marriageLength: "&dDays of marriage: &c{0}"
@@ -184,4 +190,5 @@ messages:
   help-divorce: "&d/divorce &4- &cDivorce with player"
   help-dRequirements: "&d/divorce requirements &4- &cRequirements for getting divorced"
   help-reload: "&d/marry reload &4- &cReload configuration and data"
-  help-force: "&d/marry force <divorce|marry> <player> [player (for force marry)] &4- &cForce marriage/divorce"
+  help-mForce: "&d/marry force <player> <player> &4- &cForce marriage"
+  help-dForce: "&d/divorce force <player> &4- &cForce divorce"

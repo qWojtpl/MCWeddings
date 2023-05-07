@@ -57,21 +57,25 @@ public class Commands implements CommandExecutor {
                         sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("mustBePlayer"));
                         return true;
                     }
-                    if(args.length > 1) {
-                        if(args[1].equalsIgnoreCase("marry")) {
-                            if(args.length > 3) {
-                                plugin.getMarriageManager().forceMarriage((Player) sender, args[2], args[3]);
-                                return true;
-                            }
-                        } else if(args[1].equalsIgnoreCase("divorce")) {
-                            if(args.length > 2) {
-                                plugin.getMarriageManager().forceDivorce((Player) sender, args[2]);
-                                return true;
-                            }
+                    if(marry) {
+                        if(args.length > 2) {
+                            plugin.getMarriageManager().forceMarriage((Player) sender, args[1], args[2]);
+                            return true;
+                        }
+                    } else {
+                        if(args.length > 1) {
+                            plugin.getMarriageManager().forceDivorce((Player) sender, args[1]);
+                            return true;
                         }
                     }
-                    sender.sendMessage(MessageFormat.format(messages.getMessage("correctUsage"),
-                            "/" + label + " " + args[0] + "<divorce|marry> <player> [player (for force marry)]"));
+                    String add = "";
+                    if(marry) {
+                        add = "<player>";
+                    }
+                    sender.sendMessage(
+                            messages.getMessage("prefix") +
+                            MessageFormat.format(messages.getMessage("correctUsage"),
+                                "/" + label + " " + args[0] + " <player> " + add));
                     return true;
                 }
             }
@@ -122,7 +126,7 @@ public class Commands implements CommandExecutor {
                     sender.sendMessage(messages.getMessage("prefix") + messages.getMessage("mustBePlayer"));
                     return true;
                 }
-                plugin.getMarriageManager().divorce((Player) sender, false);
+                plugin.getMarriageManager().divorce(sender.getName(), false);
             }
         }
         return true;
@@ -143,7 +147,8 @@ public class Commands implements CommandExecutor {
         if(sender.hasPermission(permissionManager.getPermission(dataHandler.getManagePermission()))) {
             sender.sendMessage("§4----------------------------------");
             sender.sendMessage(messages.getMessage("help-reload"));
-            sender.sendMessage(messages.getMessage("help-force"));
+            sender.sendMessage(messages.getMessage("help-mForce"));
+            sender.sendMessage(messages.getMessage("help-dForce"));
         }
         sender.sendMessage(" ");
         sender.sendMessage("§c<----------> §dMCWeddings §c<---------->");

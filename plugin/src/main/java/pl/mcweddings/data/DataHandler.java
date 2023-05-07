@@ -1,7 +1,6 @@
 package pl.mcweddings.data;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -16,7 +15,6 @@ import pl.mcweddings.wedding.Reward;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +38,7 @@ public class DataHandler {
     private int maxDataIndex;
     private int requestCooldown;
     private int suffixCooldown;
+    private int maxDistance;
 
     public void loadConfig() {
         plugin.getPermissionManager().clearPermissions();
@@ -64,6 +63,7 @@ public class DataHandler {
             this.suffixCooldown = yml.getInt("config.suffixCooldown");
         }
         this.requestCooldown = yml.getInt("config.requestCooldown");
+        this.maxDistance = yml.getInt("config.maxDistance");
         this.requirementsAlias = yml.getString("args-aliases.requirements", "requirements");
         this.statusAlias = yml.getString("args-aliases.status", "status");
         this.rewardsAlias = yml.getString("args-aliases.rewards", "rewards");
@@ -83,6 +83,7 @@ public class DataHandler {
     public void loadMessages(YamlConfiguration yml) {
         Messages mess = plugin.getMessages();
         ConfigurationSection section = yml.getConfigurationSection("messages");
+        if(section == null) return;
         for(String key : section.getKeys(false)) {
             mess.getMessages().put(key, getYAMLString(yml, "messages." + key));
         }

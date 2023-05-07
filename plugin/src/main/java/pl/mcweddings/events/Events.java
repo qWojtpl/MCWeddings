@@ -8,8 +8,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import pl.mcweddings.MCWeddings;
 import pl.mcweddings.wedding.Marriage;
 
-import java.text.MessageFormat;
-
 public class Events implements Listener {
 
     private final MCWeddings plugin = MCWeddings.getInstance();
