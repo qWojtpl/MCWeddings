@@ -58,12 +58,16 @@ public class MarriageManager {
             }
         }
         if(!forced) {
+            if(!p.getWorld().equals(p2.getWorld())) {
+                sender.sendMessage(prefix + messages.getMessage("tooFarAway"));
+                return;
+            }
             if(p.getLocation().distance(p2.getLocation()) > plugin.getDataHandler().getMaxDistance()) {
                 sender.sendMessage(prefix + messages.getMessage("tooFarAway"));
                 return;
             }
             List<Integer> slots = getItemSlots(p, plugin.getDataHandler().getMarryCost());
-            if (slots.size() < 1) {
+            if(slots.size() < 1) {
                 p.sendMessage(prefix + messages.getMessage("marryNoRequiredItems"));
                 sender.sendMessage(prefix + messages.getMessage("partnerWithoutItems"));
                 return;
@@ -142,6 +146,10 @@ public class MarriageManager {
                         MessageFormat.format(prefix + messages.getMessage("cannotFoundPlayer"), nickname));
                 return;
             }
+        }
+        if(!p.getWorld().equals(sender.getWorld())) {
+            sender.sendMessage(prefix + messages.getMessage("tooFarAway"));
+            return;
         }
         if(p.getLocation().distance(sender.getLocation()) > plugin.getDataHandler().getMaxDistance()) {
             sender.sendMessage(prefix + messages.getMessage("tooFarAway"));
