@@ -58,13 +58,15 @@ public class MarriageManager {
             }
         }
         if(!forced) {
-            if(!p.getWorld().equals(p2.getWorld())) {
-                sender.sendMessage(prefix + messages.getMessage("tooFarAway"));
-                return;
-            }
-            if(p.getLocation().distance(p2.getLocation()) > plugin.getDataHandler().getMaxDistance()) {
-                sender.sendMessage(prefix + messages.getMessage("tooFarAway"));
-                return;
+            if(plugin.getDataHandler().getMaxDistance() != 0) {
+                if (!p.getWorld().equals(p2.getWorld())) {
+                    sender.sendMessage(prefix + messages.getMessage("tooFarAway"));
+                    return;
+                }
+                if (p.getLocation().distance(p2.getLocation()) > plugin.getDataHandler().getMaxDistance()) {
+                    sender.sendMessage(prefix + messages.getMessage("tooFarAway"));
+                    return;
+                }
             }
             List<Integer> slots = getItemSlots(p, plugin.getDataHandler().getMarryCost());
             if(slots.size() < 1) {
@@ -147,13 +149,15 @@ public class MarriageManager {
                 return;
             }
         }
-        if(!p.getWorld().equals(sender.getWorld())) {
-            sender.sendMessage(prefix + messages.getMessage("tooFarAway"));
-            return;
-        }
-        if(p.getLocation().distance(sender.getLocation()) > plugin.getDataHandler().getMaxDistance()) {
-            sender.sendMessage(prefix + messages.getMessage("tooFarAway"));
-            return;
+        if(plugin.getDataHandler().getMaxDistance() != 0) {
+            if (!p.getWorld().equals(sender.getWorld())) {
+                sender.sendMessage(prefix + messages.getMessage("tooFarAway"));
+                return;
+            }
+            if (p.getLocation().distance(sender.getLocation()) > plugin.getDataHandler().getMaxDistance()) {
+                sender.sendMessage(prefix + messages.getMessage("tooFarAway"));
+                return;
+            }
         }
         if(getItemSlots(sender, plugin.getDataHandler().getMarryCost()).size() < 1) {
             sender.sendMessage(prefix + messages.getMessage("marryNoRequiredItems"));

@@ -31,7 +31,7 @@ config:
   # In seconds. After this seconds player can send marry requests again to player
   requestCooldown: 120
 
-  # Max distance between two players who want to marry.
+  # Max distance between two players who want to marry. Set to 0 to disable.
   maxDistance: 32
 
   # Cost for marry/divorce. Can be any item.
